@@ -1,0 +1,3474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CartShift Inventory Pro v9.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&family=Unbounded:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#0b0c0e; --bg2:#111214; --bg3:#18191d; --bg4:#222327; --bg5:#2a2b30;
+  --bdr:rgba(255,255,255,.07); --bdr2:rgba(255,255,255,.13);
+  --txt:#f0f0f4; --txt2:#9a9aa8; --txt3:#52525e;
+  --orange:#F97316; --orange-l:rgba(249,115,22,.12); --orange-b:rgba(249,115,22,.30);
+  --green:#2dcf8e;  --green-l:rgba(45,207,142,.10);  --green-b:rgba(45,207,142,.28);
+  --red:#e8554a;    --red-l:rgba(232,85,74,.10);     --red-b:rgba(232,85,74,.28);
+  --blue:#5b9cf6;   --blue-l:rgba(91,156,246,.10);   --blue-b:rgba(91,156,246,.28);
+  --gold:#f5c842;   --gold-l:rgba(245,200,66,.10);   --gold-b:rgba(245,200,66,.28);
+  --purple:#a78bfa; --purple-l:rgba(167,139,250,.10);--purple-b:rgba(167,139,250,.28);
+  --r:14px; --rm:10px; --rs:7px;
+}
+html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;font-size:15px;overflow:hidden;}
+@media(max-width:900px){html,body{overflow:auto;height:auto;}}
+.app-shell{display:flex;height:100vh;width:100vw;}
+@media(max-width:900px){.app-shell{height:auto;min-height:100vh;}}
+
+/* ── SIDEBAR ── */
+.sidebar{width:180px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow-y:auto;position:relative;z-index:10;}
+.sidebar-logo{padding:20px 16px 18px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px;}
+.sidebar-logo-icon{width:34px;height:34px;background:var(--orange-l);border:1px solid var(--orange-b);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.sidebar-logo-name{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;color:var(--txt);letter-spacing:-.3px;line-height:1.2;}
+.sidebar-logo-sub{font-size:9px;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-top:2px;}
+.sidebar-nav{padding:10px 8px;flex:1;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--rm);cursor:pointer;font-size:13px;font-weight:500;color:var(--txt2);transition:background .14s,color .14s;margin-bottom:2px;user-select:none;border:1px solid transparent;}
+.nav-item:hover{background:var(--bg3);color:var(--txt);}
+.nav-item.active{background:var(--orange-l);border-color:var(--orange-b);color:var(--orange);}
+.nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0;}
+.sidebar-divider{height:1px;background:var(--bdr);margin:6px 8px;}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.topbar{padding:16px 28px 13px;border-bottom:1px solid var(--bdr);background:rgba(11,12,14,.94);display:flex;align-items:center;flex-shrink:0;gap:10px;}
+.topbar-left{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+.topbar-title{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:700;color:var(--txt);letter-spacing:-.5px;line-height:1;}
+.topbar-sub{font-size:12px;color:var(--txt3);}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.topbar-badge{font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-l);border:1px solid var(--blue-b);border-radius:999px;padding:3px 8px;letter-spacing:.05em;}
+.btn-add{background:var(--orange);color:#fff;border:none;border-radius:var(--rm);padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;transition:opacity .14s;white-space:nowrap;}
+.btn-add:hover{opacity:.88;}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding:22px 28px 40px;position:relative;}
+.content::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0;}
+.page{display:none;position:relative;z-index:1;}
+.page.active{display:block;}
+
+/* ── SHARED COMPONENTS ── */
+.sec-label{font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin:20px 0 10px;display:flex;align-items:center;gap:8px;}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--bdr);}
+
+/* ── ALERT SYSTEM v2 ── */
+/* Stock alert rows */
+.stock-alert-section{margin-bottom:14px;}
+.stock-alert-header{display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:var(--r) var(--r) 0 0;border:1px solid transparent;}
+.stock-alert-header.oos{background:rgba(232,85,74,.14);border-color:var(--red-b);}
+.stock-alert-header.low{background:rgba(245,200,66,.10);border-color:var(--gold-b);}
+.sah-icon{font-size:16px;flex-shrink:0;}
+.sah-title{font-size:13px;font-weight:700;flex:1;}
+.sah-title.oos{color:var(--red);}
+.sah-title.low{color:var(--gold);}
+.sah-count{font-size:11px;font-weight:700;border-radius:999px;padding:2px 9px;}
+.sah-count.oos{background:var(--red-l);border:1px solid var(--red-b);color:var(--red);}
+.sah-count.low{background:var(--gold-l);border:1px solid var(--gold-b);color:var(--gold);}
+.stock-alert-rows{border:1px solid var(--bdr);border-top:none;border-radius:0 0 var(--r) var(--r);overflow:hidden;}
+.sar-item{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--bdr);background:var(--bg2);transition:background .12s;}
+.sar-item:last-child{border-bottom:none;}
+.sar-item:hover{background:var(--bg3);}
+.sar-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.sar-name{font-size:14px;font-weight:600;color:var(--txt);flex:1;min-width:0;}
+.sar-meta{font-size:11px;color:var(--txt3);white-space:nowrap;}
+.sar-bar-wrap{width:80px;flex-shrink:0;}
+.sar-bar-bg{height:5px;background:var(--bg4);border-radius:999px;overflow:hidden;}
+.sar-bar-fill{height:100%;border-radius:999px;transition:width .3s;}
+.sar-badge{font-size:11px;font-weight:700;font-family:'DM Mono',monospace;border-radius:999px;padding:3px 10px;white-space:nowrap;flex-shrink:0;}
+.sar-badge.oos{background:var(--red-l);border:1px solid var(--red-b);color:var(--red);}
+.sar-badge.low{background:var(--gold-l);border:1px solid var(--gold-b);color:var(--gold);}
+/* Alerts page */
+.alerts-page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.alerts-summary-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.asc-chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid transparent;}
+.asc-chip.oos{background:var(--red-l);border-color:var(--red-b);color:var(--red);}
+.asc-chip.low{background:var(--gold-l);border-color:var(--gold-b);color:var(--gold);}
+.asc-chip.ok{background:var(--green-l);border-color:var(--green-b);color:var(--green);}
+/* Restock threshold controls */
+.rst-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rm);margin-bottom:8px;transition:border-color .12s;}
+.rst-item:hover{border-color:var(--bdr2);}
+.rst-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.rst-name{font-size:14px;font-weight:600;color:var(--txt);flex:1;}
+.rst-target-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:3px;}
+.rst-target-label{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;}
+.rst-target-row{display:flex;align-items:center;gap:6px;}
+.rst-input{width:64px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rs);padding:5px 8px;font-size:13px;font-weight:700;color:var(--txt);font-family:'DM Mono',monospace;text-align:center;}
+.rst-input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 2px var(--orange-l);}
+.rst-pct-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:3px;}
+.rst-pct-label{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;}
+.rst-pct-row{display:flex;align-items:center;gap:6px;}
+.rst-pct-input{width:52px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rs);padding:5px 8px;font-size:13px;font-weight:700;color:var(--orange);font-family:'DM Mono',monospace;text-align:center;}
+.rst-pct-input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 2px var(--orange-l);}
+/* legacy compat */
+.alert-card{background:var(--red-l);border:1px solid var(--red-b);border-radius:var(--r);padding:15px 18px;margin-bottom:14px;}
+.alert-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.alert-hdr-ico{font-size:14px;}.alert-hdr-title{font-size:13px;font-weight:700;color:var(--red);}
+.alert-list{list-style:none;display:flex;flex-direction:column;gap:2px;}
+.alert-list li{font-size:13px;color:var(--red);opacity:.85;}
+
+/* banner */
+.banner{background:var(--orange-l);border:1px solid var(--orange-b);border-radius:var(--r);padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
+.pulse{width:9px;height:9px;border-radius:50%;background:var(--orange);animation:pulse 1.4s ease-in-out infinite;flex-shrink:0;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+.banner-title{font-size:13px;font-weight:700;color:var(--orange);}
+.banner-sub{font-size:12px;color:var(--txt3);margin-top:2px;}
+.banner-side{margin-left:auto;font-size:11px;font-weight:600;color:var(--txt3);background:var(--bg4);border:1px solid var(--bdr2);border-radius:999px;padding:3px 10px;}
+
+/* stat cards */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.stat-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:14px 16px;}
+.stat-lbl{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.stat-val{font-size:28px;font-weight:700;font-family:'DM Mono',monospace;line-height:1;}
+.c-orange{color:var(--orange);} .c-green{color:var(--green);} .c-gold{color:var(--gold);} .c-red{color:var(--red);}
+.c-blue{color:var(--blue);} .c-purple{color:var(--purple);}
+
+/* quick actions */
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px;}
+.quick-card{border-radius:var(--r);padding:18px;cursor:pointer;display:flex;flex-direction:column;gap:6px;border:1px solid var(--bdr);transition:transform .12s,filter .12s;}
+.quick-card:hover{transform:translateY(-2px);filter:brightness(1.1);}
+.quick-card:active{transform:scale(.98);}
+.qc-orange{background:var(--orange-l);border-color:var(--orange-b);}
+.qc-green{background:var(--green-l);border-color:var(--green-b);}
+.qc-red{background:var(--red-l);border-color:var(--red-b);}
+.qc-blue{background:var(--blue-l);border-color:var(--blue-b);}
+.quick-ico{font-size:22px;}
+.quick-title{font-size:14px;font-weight:700;}
+.qc-orange .quick-title{color:var(--orange);}
+.qc-green .quick-title{color:var(--green);}
+.qc-red .quick-title{color:var(--red);}
+.qc-blue .quick-title{color:var(--blue);}
+.quick-sub{font-size:12px;color:var(--txt3);}
+
+/* low stock list (dashboard) */
+.low-list{display:flex;flex-direction:column;gap:8px;}
+.low-item{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rm);padding:12px 16px;display:flex;align-items:center;gap:10px;}
+.low-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.low-info{flex:1;}
+.low-name{font-size:14px;font-weight:600;color:var(--txt);}
+.low-sub{font-size:11px;color:var(--txt3);margin-top:2px;}
+.low-badge{font-size:11px;font-weight:700;font-family:'DM Mono',monospace;background:var(--red-l);border:1px solid var(--red-b);border-radius:999px;padding:3px 10px;color:var(--red);}
+.low-badge.gold{background:var(--gold-l);border-color:var(--gold-b);color:var(--gold);}
+
+/* ── INVENTORY PAGE ── */
+.inv-filters{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+.filter-chip{padding:6px 14px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--bdr2);background:var(--bg3);color:var(--txt2);transition:background .12s,color .12s,border-color .12s;user-select:none;}
+.filter-chip:hover{background:var(--bg4);color:var(--txt);}
+.filter-chip.active{background:var(--orange-l);border-color:var(--orange-b);color:var(--orange);}
+
+.inv-item{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;transition:border-color .14s;cursor:pointer;}
+.inv-item:hover{border-color:var(--bdr2);}
+.inv-item.out{border-color:var(--red-b);background:rgba(232,85,74,.04);}
+.inv-item.low-stock{border-color:var(--gold-b);background:rgba(245,200,66,.04);}
+.inv-top{display:flex;align-items:center;gap:10px;}
+.inv-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.inv-name{font-size:15px;font-weight:700;color:var(--txt);flex:1;}
+.inv-out-badge{font-size:10px;font-weight:700;color:var(--red);background:var(--red-l);border:1px solid var(--red-b);border-radius:999px;padding:2px 8px;margin-left:4px;}
+.inv-low-badge{font-size:10px;font-weight:700;color:var(--gold);background:var(--gold-l);border:1px solid var(--gold-b);border-radius:999px;padding:2px 8px;margin-left:4px;}
+.inv-qty{font-size:22px;font-weight:700;font-family:'DM Mono',monospace;color:var(--txt2);}
+.inv-qty.out{color:var(--red);}
+.inv-qty.low{color:var(--gold);}
+.inv-qty.ok{color:var(--green);}
+.inv-unit{font-size:12px;color:var(--txt3);margin-left:4px;}
+.inv-meta{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.inv-meta-pill{font-size:11px;color:var(--txt3);background:var(--bg4);border:1px solid var(--bdr);border-radius:999px;padding:2px 9px;}
+.inv-batch-info{font-size:12px;color:var(--txt3);margin-top:6px;}
+
+/* expand panel */
+.inv-expand{display:none;margin-top:14px;border-top:1px solid var(--bdr);padding-top:14px;}
+.inv-item.expanded .inv-expand{display:block;}
+.batch-form{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;margin-bottom:10px;}
+.batch-field{}
+.batch-lbl{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+.batch-input{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rs);padding:9px 10px;font-size:13px;color:var(--txt);font-family:'DM Mono',monospace;}
+.batch-input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 2px var(--orange-l);}
+.batch-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.btn-batch{background:var(--green-l);border:1px solid var(--green-b);color:var(--green);border-radius:var(--rs);padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:opacity .12s;}
+.btn-batch:hover{opacity:.8;}
+
+.batches-list{display:flex;flex-direction:column;gap:6px;}
+.batch-row-item{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--rs);padding:9px 12px;}
+.batch-row-date{font-size:11px;color:var(--txt3);min-width:80px;}
+.batch-row-qty{font-size:14px;font-weight:700;font-family:'DM Mono',monospace;color:var(--txt);flex:1;}
+.batch-row-cost{font-size:12px;color:var(--gold);font-family:'DM Mono',monospace;}
+.batch-del{width:24px;height:24px;border-radius:50%;background:var(--red-l);border:1px solid var(--red-b);color:var(--red);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .18s;}
+.modal-overlay.open{opacity:1;pointer-events:all;backdrop-filter:blur(4px);}
+.modal{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;transform:translateY(12px);transition:transform .18s;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-title{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:700;color:var(--txt);margin-bottom:20px;}
+.field-group{margin-bottom:14px;}
+.field-lbl{font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;display:block;}
+.field-input{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rm);padding:10px 12px;font-size:14px;color:var(--txt);font-family:'DM Sans',sans-serif;}
+.field-input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-l);}
+.field-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.color-grid{display:flex;gap:8px;flex-wrap:wrap;}
+.color-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color .12s;}
+.color-swatch.selected{border-color:var(--txt);}
+.modal-actions{display:flex;gap:10px;margin-top:20px;}
+.btn-save{flex:1;background:var(--orange);color:#fff;border:none;border-radius:var(--rm);padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .12s;}
+.btn-save:hover{opacity:.85;}
+.btn-cancel{background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--rm);padding:12px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .12s;}
+.btn-cancel:hover{opacity:.75;}
+
+/* placeholder pages */
+.page-ph{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:60px 28px;text-align:center;color:var(--txt3);}
+.ph-ico{font-size:42px;margin-bottom:12px;display:block;opacity:.4;}
+.ph-title{font-size:16px;font-weight:600;color:var(--txt2);margin-bottom:6px;}
+.ph-sub{font-size:13px;color:var(--txt3);}
+
+/* ── PIN MODAL ── */
+.pin-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .18s;}
+.pin-overlay.open{opacity:1;pointer-events:all;backdrop-filter:blur(6px);}
+.pin-box{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);padding:28px 24px;width:100%;max-width:340px;text-align:center;}
+.pin-icon{font-size:32px;margin-bottom:10px;}
+.pin-title{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:700;color:var(--txt);margin-bottom:4px;}
+.pin-sub{font-size:12px;color:var(--txt3);margin-bottom:20px;}
+.pin-dots{display:flex;justify-content:center;gap:12px;margin-bottom:20px;}
+.pin-dot{width:14px;height:14px;border-radius:50%;background:var(--bg4);border:2px solid var(--bdr2);transition:background .14s,border-color .14s;}
+.pin-dot.filled{background:var(--orange);border-color:var(--orange);}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.pin-key{background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rm);padding:14px;font-size:18px;font-weight:600;color:var(--txt);cursor:pointer;font-family:'DM Mono',monospace;transition:background .1s,transform .1s;}
+.pin-key:hover{background:var(--bg4);}
+.pin-key:active{transform:scale(.93);background:var(--bg5);}
+.pin-key.del{font-size:14px;color:var(--txt3);}
+.pin-error{font-size:12px;color:var(--red);min-height:18px;margin-bottom:6px;}
+.pin-cancel{font-size:12px;color:var(--txt3);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:'DM Sans',sans-serif;}
+.pin-cancel:hover{color:var(--txt2);}
+.del-mgr-btn{background:none;border:1px solid var(--bdr2);border-radius:var(--rs);padding:4px 10px;font-size:11px;color:var(--txt3);cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .12s,color .12s,border-color .12s;}
+.del-mgr-btn:hover{background:var(--bg4);color:var(--txt);}
+.del-mgr-btn.danger:hover{background:var(--red-l);border-color:var(--red-b);color:var(--red);}
+.session-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;border-radius:999px;padding:3px 10px;background:var(--orange-l);border:1px solid var(--orange-b);color:var(--orange);}
+
+/* ── DELIVERIES ── */
+.del-record{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;transition:border-color .14s;}
+.del-record:hover{border-color:var(--bdr2);}
+.del-rec-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.del-rec-vendor{font-size:15px;font-weight:700;color:var(--txt);}
+.del-rec-date{font-size:12px;color:var(--txt3);margin-top:2px;}
+.del-rec-total{font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:var(--gold);}
+.del-rec-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.del-chip{font-size:11px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:999px;padding:3px 10px;color:var(--txt2);}
+.del-line-row{display:flex;gap:8px;align-items:flex-end;padding:10px 0;border-bottom:1px solid var(--bdr);}
+.del-line-row:first-child{padding-top:0;}
+.del-line-row:last-child{border-bottom:none;padding-bottom:0;}
+.del-select{flex:2;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rs);padding:9px 10px;font-size:13px;color:var(--txt);font-family:'DM Sans',sans-serif;min-width:0;}
+.del-select:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 2px var(--orange-l);}
+.del-num{width:80px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rs);padding:9px 8px;font-size:14px;font-weight:600;text-align:center;color:var(--txt);font-family:'DM Mono',monospace;flex-shrink:0;}
+.del-num:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 2px var(--orange-l);}
+.del-num::-webkit-inner-spin-button{-webkit-appearance:none;}
+.del-num.cost{color:var(--gold);}
+.del-line-del{width:28px;height:28px;border-radius:50%;background:var(--red-l);border:1px solid var(--red-b);color:var(--red);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'DM Sans',sans-serif;}
+.del-line-del:hover{opacity:.8;}
+.del-line-lbl{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;}
+
+/* ── LEDGER ── */
+.ledger-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.ledger-search{flex:1;min-width:160px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rm);padding:8px 12px;font-size:13px;color:var(--txt);font-family:'DM Sans',sans-serif;}
+.ledger-search:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 2px var(--orange-l);}
+.ledger-date{background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rm);padding:8px 10px;font-size:12px;color:var(--txt2);font-family:'DM Sans',sans-serif;cursor:pointer;}
+.ledger-date:focus{outline:none;border-color:var(--orange);}
+.ledger-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.ledger-count{font-size:11px;color:var(--txt3);margin-bottom:12px;}
+.ledger-table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bdr);}
+.ledger-table{width:100%;border-collapse:collapse;font-size:13px;}
+.ledger-table th{background:var(--bg3);color:var(--txt3);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:10px 12px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--bdr);}
+.ledger-table td{padding:10px 12px;border-bottom:1px solid var(--bdr);vertical-align:middle;white-space:nowrap;}
+.ledger-table tr:last-child td{border-bottom:none;}
+.ledger-table tr:hover td{background:rgba(255,255,255,.025);}
+.ledger-table .td-dt{font-size:11px;color:var(--txt3);font-family:'DM Mono',monospace;line-height:1.4;}
+.ledger-table .td-item{font-weight:600;color:var(--txt);}
+.ledger-table .td-ref{font-size:11px;color:var(--txt3);font-family:'DM Mono',monospace;}
+.ledger-table .td-by{font-size:11px;}
+.ldg-badge{display:inline-block;font-size:10px;font-weight:700;border-radius:999px;padding:3px 9px;letter-spacing:.03em;white-space:nowrap;}
+.ldg-delivery{background:var(--green-l);border:1px solid var(--green-b);color:var(--green);}
+.ldg-shift-out{background:var(--orange-l);border:1px solid var(--orange-b);color:var(--orange);}
+.ldg-shift-return{background:var(--blue-l);border:1px solid var(--blue-b);color:var(--blue);}
+.ldg-batch-del{background:var(--red-l);border:1px solid var(--red-b);color:var(--red);}
+.ldg-item-add{background:var(--purple-l);border:1px solid var(--purple-b);color:var(--purple);}
+.ldg-item-del{background:var(--red-l);border:1px solid var(--red-b);color:var(--red);}
+.ldg-del-edit{background:var(--gold-l);border:1px solid var(--gold-b);color:var(--gold);}
+.ldg-del-del{background:var(--red-l);border:1px solid var(--red-b);color:var(--red);}
+.ldg-mgr{background:var(--purple-l);border:1px solid var(--purple-b);color:var(--purple);}
+.ldg-adjustment{background:var(--gold-l);border:1px solid var(--gold-b);color:var(--gold);}
+.td-qty-pos{color:var(--green);font-weight:700;font-family:'DM Mono',monospace;}
+.td-qty-neg{color:var(--red);font-weight:700;font-family:'DM Mono',monospace;}
+.td-qty-neu{color:var(--txt2);font-family:'DM Mono',monospace;}
+.td-cost{color:var(--gold);font-family:'DM Mono',monospace;font-size:12px;}
+.ledger-empty{padding:60px 28px;text-align:center;color:var(--txt3);}
+.btn-print{background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--rm);padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;transition:background .12s,color .12s;white-space:nowrap;}
+.btn-print:hover{background:var(--bg4);color:var(--txt);}
+.btn-csv{background:var(--green-l);border:1px solid var(--green-b);color:var(--green);border-radius:var(--rm);padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;transition:opacity .12s;white-space:nowrap;}
+.btn-csv:hover{opacity:.8;}
+
+/* ── HIGHLIGHT / LOCATE ── */
+@keyframes rowFlash{0%,100%{background:transparent}30%{background:rgba(249,115,22,.18)}}
+.row-highlight{animation:rowFlash 1.8s ease;}
+
+/* ── PRINT STYLES ── */
+@media print{
+  body{background:#fff!important;color:#111!important;font-size:12px;}
+  .sidebar,.topbar,.ledger-toolbar,.ledger-chips,.btn-print,.pin-overlay,.modal-overlay{display:none!important;}
+  .app-shell{display:block!important;}
+  .main{display:block!important;}
+  .content{overflow:visible!important;padding:0!important;}
+  .page{display:none!important;}
+  .page.active{display:block!important;}
+  .ledger-table-wrap{border:1px solid #ccc!important;border-radius:0!important;}
+  .ledger-table th{background:#f5f5f5!important;color:#444!important;border-bottom:1px solid #ddd!important;}
+  .ledger-table td{border-bottom:1px solid #eee!important;color:#111!important;}
+  .ldg-badge{border:1px solid #aaa!important;color:#333!important;background:#f0f0f0!important;}
+  .td-qty-pos{color:#1a7a46!important;}
+  .td-qty-neg{color:#b91c1c!important;}
+  .td-cost{color:#92400e!important;}
+  .print-header{display:block!important;}
+  .ledger-count{display:block!important;color:#555!important;}
+}
+.print-header{display:none;}
+
+/* ── SHIFTS ── */
+/* Step indicators */
+.shift-steps{display:flex;align-items:center;gap:0;margin-bottom:28px;max-width:500px;}
+.shift-step{display:flex;align-items:center;gap:8px;flex:1;}
+.shift-step-num{width:28px;height:28px;border-radius:50%;background:var(--bg4);border:2px solid var(--bdr2);color:var(--txt3);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
+.shift-step-num.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+.shift-step-num.done{background:var(--green);border-color:var(--green);color:#fff;}
+.shift-step-label{font-size:12px;color:var(--txt3);font-weight:500;}
+.shift-step-label.active{color:var(--orange);}
+.shift-step-connector{flex:1;height:2px;background:var(--bdr);margin:0 8px;max-width:40px;}
+
+/* Start shift card */
+.shift-start-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:32px 28px;max-width:560px;}
+.shift-start-ico{font-size:38px;margin-bottom:12px;}
+.shift-start-title{font-family:'Unbounded',sans-serif;font-size:17px;font-weight:700;color:var(--txt);margin-bottom:6px;}
+.shift-start-sub{font-size:13px;color:var(--txt3);margin-bottom:22px;line-height:1.6;}
+.shift-staff-input{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rm);padding:11px 14px;font-size:14px;color:var(--txt);font-family:'DM Sans',sans-serif;margin-bottom:0;}
+.shift-staff-input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-l);}
+.btn-shift-start{width:100%;background:var(--orange);color:#fff;border:none;border-radius:var(--rm);padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .12s;}
+.btn-shift-start:hover{opacity:.88;}
+
+/* Cart loading step */
+.cart-load-section{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:20px;margin-bottom:12px;}
+.cart-load-title{font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.cart-load-title::after{content:'';flex:1;height:1px;background:var(--bdr);}
+.cart-load-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdr);}
+.cart-load-item:last-child{border-bottom:none;padding-bottom:0;}
+.cli-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.cli-name{flex:1;font-size:13px;font-weight:600;color:var(--txt);}
+.cli-stock{font-size:11px;color:var(--txt3);}
+.cli-qty{width:64px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rs);padding:7px 8px;font-size:14px;font-weight:700;text-align:center;color:var(--txt);font-family:'DM Mono',monospace;}
+.cli-qty:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 2px var(--orange-l);}
+.cli-qty::-webkit-inner-spin-button{-webkit-appearance:none;}
+.cart-load-empty{font-size:13px;color:var(--txt3);text-align:center;padding:18px 0;}
+
+/* Opening cash */
+.cash-input-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.cash-prefix{font-size:16px;font-weight:700;color:var(--gold);font-family:'DM Mono',monospace;}
+.cash-input{flex:1;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rm);padding:11px 14px;font-size:16px;font-weight:700;color:var(--gold);font-family:'DM Mono',monospace;}
+.cash-input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-l);}
+.cash-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+
+/* Active shift header */
+.shift-hdr{background:var(--bg2);border:1px solid var(--orange-b);border-radius:var(--r);padding:16px 20px;margin-bottom:14px;display:flex;align-items:center;gap:14px;}
+.shift-hdr-info{flex:1;}
+.shift-hdr-name{font-size:15px;font-weight:700;color:var(--orange);}
+.shift-hdr-sub{font-size:12px;color:var(--txt3);margin-top:2px;}
+.shift-hdr-timer{font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--txt2);background:var(--bg4);border:1px solid var(--bdr2);border-radius:999px;padding:4px 12px;}
+.btn-end-shift{background:var(--green-l);border:1px solid var(--green-b);color:var(--green);border-radius:var(--rm);padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:opacity .12s;}
+.btn-end-shift:hover{opacity:.8;}
+
+/* Active shift: cart summary bar */
+.shift-cart-bar{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.scb-label{font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;font-weight:600;}
+.scb-chips{display:flex;flex-wrap:wrap;gap:5px;flex:1;}
+.scb-chip{font-size:11px;font-weight:600;background:var(--orange-l);border:1px solid var(--orange-b);color:var(--orange);border-radius:999px;padding:2px 9px;}
+
+.shift-item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:14px;}
+.shift-item-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:14px 16px;}
+.shift-item-card:hover{border-color:var(--bdr2);}
+.sic-name{font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px;}
+.sic-stock{font-size:11px;color:var(--txt3);margin-bottom:10px;}
+.sic-controls{display:flex;align-items:center;gap:6px;}
+.sic-qty{width:54px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rs);padding:6px 8px;font-size:14px;font-weight:700;text-align:center;color:var(--txt);font-family:'DM Mono',monospace;}
+.sic-qty:focus{outline:none;border-color:var(--orange);}
+.sic-qty::-webkit-inner-spin-button{-webkit-appearance:none;}
+.btn-sic{border-radius:var(--rs);font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;padding:6px 10px;border:none;transition:opacity .12s;}
+.btn-sic:hover{opacity:.82;}
+.btn-sic-out{background:var(--orange);color:#fff;}
+.btn-sic-waste{background:var(--red-l);border:1px solid var(--red-b);color:var(--red);}
+.sic-out-tally{font-size:11px;color:var(--orange);font-weight:600;margin-top:6px;}
+.sic-price{font-size:11px;font-weight:700;color:var(--green);font-family:'DM Mono',monospace;white-space:nowrap;flex-shrink:0;}
+
+.shift-log-preview{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:14px 16px;margin-bottom:14px;}
+.shift-log-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bdr);font-size:12px;}
+.shift-log-row:last-child{border-bottom:none;}
+
+/* End shift — improved returns table */
+.end-shift-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px;}
+.end-shift-table th{background:var(--bg3);color:var(--txt3);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:9px 12px;text-align:left;border-bottom:1px solid var(--bdr);}
+.end-shift-table td{padding:10px 12px;border-bottom:1px solid var(--bdr);vertical-align:middle;}
+.end-shift-table tr:last-child td{border-bottom:none;}
+.end-shift-table tr:hover td{background:rgba(255,255,255,.02);}
+.est-name{font-weight:600;color:var(--txt);}
+.est-taken{font-family:'DM Mono',monospace;font-weight:700;color:var(--orange);}
+.est-return-input{width:64px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rs);padding:6px 8px;font-size:14px;font-weight:700;text-align:center;color:var(--txt);font-family:'DM Mono',monospace;}
+.est-return-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-l);}
+.est-return-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.est-sold{font-family:'DM Mono',monospace;font-weight:700;color:var(--green);}
+.est-rev{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);}
+
+/* End shift summary total row */
+.end-shift-totals{background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rm);padding:14px 18px;margin-bottom:12px;display:flex;gap:24px;flex-wrap:wrap;}
+.est-total-item{text-align:center;}
+.est-total-lbl{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+.est-total-val{font-size:20px;font-weight:700;font-family:'DM Mono',monospace;}
+
+/* Cash reconciliation */
+.cash-recon{background:var(--bg2);border:1px solid var(--gold-b);border-radius:var(--r);padding:18px 20px;margin-bottom:14px;}
+.cash-recon-title{font-size:11px;font-weight:600;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.cash-recon-title::after{content:'';flex:1;height:1px;background:var(--gold-b);}
+.cash-recon-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.cash-recon-lbl{flex:1;font-size:13px;color:var(--txt2);}
+.cash-recon-val{font-family:'DM Mono',monospace;font-size:15px;font-weight:700;}
+.cash-recon-input{width:120px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rs);padding:8px 10px;font-size:14px;font-weight:700;text-align:right;color:var(--gold);font-family:'DM Mono',monospace;}
+.cash-recon-input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-l);}
+.cash-recon-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.cash-recon-diff{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;}
+.cash-recon-diff.over{background:var(--green-l);border:1px solid var(--green-b);color:var(--green);}
+.cash-recon-diff.short{background:var(--red-l);border:1px solid var(--red-b);color:var(--red);}
+.cash-recon-diff.exact{background:var(--blue-l);border:1px solid var(--blue-b);color:var(--blue);}
+
+/* Confirm end shift button — green not red */
+.btn-confirm-end{width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--rm);padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:6px;transition:opacity .12s;}
+.btn-confirm-end:hover{opacity:.88;}
+
+/* End shift summary modal */
+.shift-summary-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:150;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.shift-summary-overlay.open{opacity:1;pointer-events:all;backdrop-filter:blur(6px);}
+.shift-summary-box{background:var(--bg2);border:1px solid var(--green-b);border-radius:var(--r);padding:28px 24px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;}
+.ssb-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.ssb-icon{font-size:32px;}
+.ssb-title{font-family:'Unbounded',sans-serif;font-size:16px;font-weight:700;color:var(--green);}
+.ssb-sub{font-size:12px;color:var(--txt3);margin-top:3px;}
+.ssb-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.ssb-stat{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--rm);padding:12px 14px;text-align:center;}
+.ssb-stat-lbl{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+.ssb-stat-val{font-size:18px;font-weight:700;font-family:'DM Mono',monospace;}
+.ssb-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;}
+.ssb-table th{background:var(--bg4);color:var(--txt3);font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:8px 10px;text-align:left;border-bottom:1px solid var(--bdr);}
+.ssb-table td{padding:8px 10px;border-bottom:1px solid var(--bdr);color:var(--txt2);}
+.ssb-table tr:last-child td{border-bottom:none;}
+.ssb-close{width:100%;background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--rm);padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .12s,color .12s;}
+.ssb-close:hover{background:var(--bg4);color:var(--txt);}
+
+/* old return card kept for compat — hidden */
+.return-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+.return-card-name{flex:1;font-size:13px;font-weight:600;color:var(--txt);}
+.return-card-out{font-size:11px;color:var(--orange);background:var(--orange-l);border:1px solid var(--orange-b);border-radius:999px;padding:2px 8px;white-space:nowrap;}
+.return-card-input{width:64px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rs);padding:7px 8px;font-size:14px;font-weight:700;text-align:center;color:var(--txt);font-family:'DM Mono',monospace;}
+.return-card-input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 2px var(--green-l);}
+.return-card-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+
+/* history */
+.hist-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:border-color .14s;}
+.hist-card:hover{border-color:var(--bdr2);}
+.hist-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
+.hist-card-staff{font-size:15px;font-weight:700;color:var(--txt);}
+.hist-card-dt{font-size:11px;color:var(--txt3);margin-top:2px;}
+.hist-card-rev{font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green);}
+.hist-card-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.hist-chip{font-size:11px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:999px;padding:3px 10px;color:var(--txt2);}
+
+/* reports */
+.rpt-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.rpt-section{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:18px;margin-bottom:12px;}
+.rpt-section-title{font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.rpt-section-title::after{content:'';flex:1;height:1px;background:var(--bdr);}
+.rpt-item-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:13px;}
+.rpt-item-row:last-child{border-bottom:none;}
+.rpt-item-name{flex:1;font-weight:600;}
+.rpt-item-val{font-family:'DM Mono',monospace;font-size:12px;text-align:right;}
+.rpt-bar-wrap{flex:2;background:var(--bg4);border-radius:999px;height:6px;overflow:hidden;}
+.rpt-bar{height:100%;border-radius:999px;background:var(--orange);}
+
+
+/* ── HAMBURGER BUTTON (hidden on desktop) ── */
+.mob-menu-btn{display:none;width:36px;height:36px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rm);align-items:center;justify-content:center;font-size:22px;cursor:pointer;flex-shrink:0;color:var(--txt);line-height:1;touch-action:manipulation;}
+
+/* ── SIDEBAR OVERLAY ── */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:89;}
+.sidebar-overlay.open{display:block;}
+
+/* ── MOBILE BOTTOM NAV ── */
+.mobile-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:58px;background:var(--bg2);border-top:1px solid var(--bdr);z-index:80;flex-direction:row;align-items:stretch;}
+.mbn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.mbn-item.active{color:var(--orange);}
+.mbn-icon{font-size:20px;line-height:1;}
+
+/* ── TABLET ≤900px ── */
+@media(max-width:900px){
+  .app-shell{height:auto;min-height:100vh;}
+  .main{overflow:visible;}
+  .content{overflow:visible;padding:14px 14px 72px;}
+  .topbar{position:sticky;top:0;z-index:40;padding:11px 14px;}
+  .mob-menu-btn{display:flex;}
+  .mobile-bottom-nav{display:flex;}
+  .sidebar{position:fixed;top:0;left:0;height:100%;width:230px;z-index:90;transform:translateX(-260px);transition:transform .22s ease;}
+  .sidebar.open{transform:translateX(0);box-shadow:8px 0 30px rgba(0,0,0,.7);}
+  .stat-row{grid-template-columns:repeat(2,1fr);}
+  .quick-grid{grid-template-columns:1fr 1fr;}
+  .rpt-stat-row{grid-template-columns:repeat(2,1fr);}
+  .ssb-stat-row{grid-template-columns:repeat(2,1fr);}
+  .batch-form{grid-template-columns:1fr 1fr;}
+  .batch-form .btn-batch{grid-column:1/-1;}
+  .shift-item-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}
+  .del-line-row{flex-wrap:wrap;}
+  .del-select{flex:1 1 100%;}
+}
+
+/* ── PHONE ≤480px ── */
+@media(max-width:480px){
+  .topbar-sub{display:none;}
+  .topbar-badge{display:none;}
+  .topbar-title{font-size:15px;}
+  .btn-add{padding:7px 12px;font-size:12px;}
+  .stat-row{gap:8px;}
+  .stat-val{font-size:22px;}
+  .quick-card{padding:13px;}
+  .banner-side{display:none;}
+  .field-row{grid-template-columns:1fr;}
+  .shift-item-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .end-shift-table th,.end-shift-table td{padding:7px 8px;font-size:12px;}
+  .est-return-input{width:52px;}
+  .btn-end-shift{width:100%;margin-top:6px;}
+  .shift-hdr{flex-wrap:wrap;}
+  .ssb-stat-val{font-size:15px;}
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">🛒</div>
+    <div>
+      <div class="sidebar-logo-name">CartShift</div>
+      <div class="sidebar-logo-sub">Inventory Pro</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard',this)"><span class="nav-icon">⊞</span><span>Dashboard</span></div>
+    <div class="nav-item" id="nav-inventory" onclick="showPage('inventory',this)"><span class="nav-icon">📦</span><span>Inventory</span></div>
+    <div class="nav-item" id="nav-deliveries" onclick="showPage('deliveries',this)"><span class="nav-icon">🚚</span><span>Deliveries</span></div>
+    <div class="nav-item" id="nav-shifts" onclick="showPage('shifts',this)"><span class="nav-icon">▶</span><span>Shifts</span></div>
+    <div class="sidebar-divider"></div>
+    <div class="nav-item" id="nav-ledger" onclick="showPage('ledger',this)"><span class="nav-icon">📋</span><span>Ledger</span></div>
+    <div class="nav-item" id="nav-reports" onclick="showPage('reports',this)"><span class="nav-icon">📊</span><span>Reports</span></div>
+    <div class="nav-item" id="nav-history" onclick="showPage('history',this)"><span class="nav-icon">🕐</span><span>History</span></div>
+    <div class="sidebar-divider"></div>
+    <div class="nav-item" id="nav-alerts" onclick="showPage('alerts',this)"><span class="nav-icon">🔔</span><span>Alerts</span><span id="alerts-nav-badge" style="display:none;margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;border-radius:999px;padding:1px 7px;min-width:18px;text-align:center"></span></div>
+    <div class="nav-item" id="nav-settings" onclick="showPage('settings',this)"><span class="nav-icon">⚙</span><span>Settings</span></div>
+  </nav>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+  <div class="topbar" id="topbar">
+    <button class="mob-menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-left">
+      <span class="topbar-title" id="topbar-title">Dashboard</span>
+      <span class="topbar-sub" id="topbar-sub">CartShift Inventory Pro</span>
+    </div>
+    <div class="topbar-right" id="topbar-right"><span class="topbar-badge">v9.0</span></div>
+  </div>
+
+  <div class="content">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div class="page active" id="page-dashboard">
+      <div id="dash-expiry-alert"></div>
+      <div id="dash-out-of-stock"></div>
+      <div class="banner">
+        <div class="pulse"></div>
+        <div>
+          <div class="banner-title">Shift in Progress</div>
+          <div class="banner-sub" id="dash-shift-sub">No active shift · Go to Shifts to begin</div>
+        </div>
+        <div class="banner-side">Staff</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-lbl">📦 Total Stock</div><div class="stat-val c-orange" id="dash-total-stock">0</div></div>
+        <div class="stat-card"><div class="stat-lbl">💰 Revenue</div><div class="stat-val c-green" id="dash-revenue">₱0</div></div>
+        <div class="stat-card"><div class="stat-lbl">📈 Gross Profit</div><div class="stat-val c-gold" id="dash-profit">₱0</div></div>
+        <div class="stat-card"><div class="stat-lbl">🏷 COGS</div><div class="stat-val c-red" id="dash-cogs">₱0</div></div>
+      </div>
+      <div class="sec-label">Quick Actions</div>
+      <div class="quick-grid">
+        <div class="quick-card qc-orange" onclick="showPage('inventory',document.getElementById('nav-inventory'))"><span class="quick-ico">📦</span><div class="quick-title">Master Inventory</div><div class="quick-sub">View all stock levels</div></div>
+        <div class="quick-card qc-green" onclick="showPage('deliveries',document.getElementById('nav-deliveries'))"><span class="quick-ico">🚛</span><div class="quick-title">Record Delivery</div><div class="quick-sub">Add vendor delivery</div></div>
+        <div class="quick-card qc-red" onclick="showPage('shifts',document.getElementById('nav-shifts'))"><span class="quick-ico">🏁</span><div class="quick-title">End Shift</div><div class="quick-sub">Count returns &amp; finish</div></div>
+        <div class="quick-card qc-blue" onclick="showPage('ledger',document.getElementById('nav-ledger'))"><span class="quick-ico">📋</span><div class="quick-title">Audit Ledger</div><div class="quick-sub">Transaction history</div></div>
+      </div>
+      <div class="sec-label">Low Stock Items</div>
+      <div id="dash-low-stock" class="low-list"></div>
+    </div>
+
+    <!-- ═══ INVENTORY ═══ -->
+    <div class="page" id="page-inventory">
+      <div id="inv-out-alert"></div>
+      <div class="inv-filters" id="inv-filters">
+        <div class="filter-chip active" onclick="setFilter('All',this)">All</div>
+        <div class="filter-chip" onclick="setFilter('Siomai',this)">Siomai</div>
+        <div class="filter-chip" onclick="setFilter('Drinks',this)">Drinks</div>
+        <div class="filter-chip" onclick="setFilter('Rice',this)">Rice</div>
+        <div class="filter-chip" onclick="setFilter('Supplies',this)">Supplies</div>
+        <div class="filter-chip" onclick="setFilter('Custom',this)">Custom</div>
+      </div>
+      <div id="inv-list"></div>
+    </div>
+
+    <!-- ═══ DELIVERIES ═══ -->
+    <div class="page" id="page-deliveries">
+      <!-- LIST VIEW -->
+      <div id="del-list-view">
+        <div style="margin-bottom:14px">
+          <div style="font-size:13px;color:var(--txt3)" id="del-count-label">Loading deliveries…</div>
+        </div>
+        <div id="del-records"></div>
+      </div>
+
+      <!-- FORM VIEW (hidden by default) -->
+      <div id="del-form-view" style="display:none;max-width:600px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px">
+          <button onclick="hideDeliveryForm()" style="background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--rm);padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">← Back</button>
+          <div>
+            <div style="font-family:'Unbounded',sans-serif;font-size:16px;font-weight:700;color:var(--txt)">Record Delivery</div>
+            <div style="font-size:12px;color:var(--txt3);margin-top:2px">Add a vendor delivery to inventory</div>
+          </div>
+        </div>
+
+        <!-- Vendor + Date -->
+        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:20px;margin-bottom:12px">
+          <div class="field-group" style="margin-bottom:14px">
+            <label class="field-lbl">VENDOR NAME</label>
+            <input class="field-input" id="del-vendor" type="text" placeholder="Enter or select vendor…" list="del-vendor-list" autocomplete="off">
+            <datalist id="del-vendor-list"></datalist>
+          </div>
+          <div class="field-group" style="margin-bottom:0">
+            <label class="field-lbl">DELIVERY DATE</label>
+            <input class="field-input" id="del-date" type="date">
+          </div>
+        </div>
+
+        <!-- Items received -->
+        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:20px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div style="font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase">ITEMS RECEIVED</div>
+            <button onclick="addDeliveryLine()" style="background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--rs);padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px">＋ Add Line</button>
+          </div>
+          <div id="del-lines"></div>
+        </div>
+
+        <!-- Total -->
+        <div style="background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rm);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <span style="font-size:13px;color:var(--txt2)">Total Delivery Cost</span>
+          <span style="font-size:22px;font-weight:700;font-family:'DM Mono',monospace;color:var(--gold)" id="del-total">₱0</span>
+        </div>
+
+        <!-- Notes -->
+        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:20px;margin-bottom:16px">
+          <label class="field-lbl">NOTES (OPTIONAL)</label>
+          <input class="field-input" id="del-notes" type="text" placeholder="Any delivery notes…">
+        </div>
+
+        <button onclick="saveDelivery()" style="width:100%;background:var(--orange);color:#fff;border:none;border-radius:var(--rm);padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .14s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">✓ Save Delivery &amp; Update Inventory</button>
+        <div id="del-save-error" style="font-size:12px;color:var(--red);text-align:center;margin-top:8px;display:none"></div>
+      </div>
+    </div>
+    <div class="page" id="page-shifts">
+
+      <!-- ══ STEP 1: Staff Name ══ -->
+      <div id="shift-idle-view">
+        <div style="max-width:560px">
+          <!-- Step indicators -->
+          <div class="shift-steps">
+            <div class="shift-step">
+              <div class="shift-step-num active" id="step-num-1">1</div>
+              <div class="shift-step-label active" id="step-lbl-1">Staff Info</div>
+            </div>
+            <div class="shift-step-connector"></div>
+            <div class="shift-step">
+              <div class="shift-step-num" id="step-num-2">2</div>
+              <div class="shift-step-label" id="step-lbl-2">Load Cart</div>
+            </div>
+            <div class="shift-step-connector"></div>
+            <div class="shift-step">
+              <div class="shift-step-num" id="step-num-3">3</div>
+              <div class="shift-step-label" id="step-lbl-3">Begin Shift</div>
+            </div>
+          </div>
+
+          <!-- Step 1 panel -->
+          <div id="shift-step1-panel">
+            <div class="shift-start-card">
+              <div class="shift-start-ico">👤</div>
+              <div class="shift-start-title">Who's on shift?</div>
+              <div class="shift-start-sub">Enter the staff name and opening cash on hand before loading the cart.</div>
+              <div style="margin-bottom:12px">
+                <div class="batch-lbl" style="margin-bottom:5px">STAFF NAME</div>
+                <input class="shift-staff-input" id="shift-staff-name" type="text" placeholder="e.g. Maria" autocomplete="off">
+              </div>
+              <div style="margin-bottom:20px">
+                <div class="batch-lbl" style="margin-bottom:5px">OPENING CASH (OPTIONAL)</div>
+                <div class="cash-input-row">
+                  <span class="cash-prefix">₱</span>
+                  <input class="cash-input" id="shift-opening-cash" type="number" min="0" step="0.01" placeholder="0.00">
+                </div>
+              </div>
+              <button class="btn-shift-start" onclick="goToLoadCart()">Next: Load Cart →</button>
+            </div>
+          </div>
+
+          <!-- Step 2 panel -->
+          <div id="shift-step2-panel" style="display:none">
+            <div class="shift-start-card" style="padding:24px 22px">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+                <div class="shift-start-ico" style="font-size:28px;margin-bottom:0">🛒</div>
+                <div>
+                  <div class="shift-start-title" style="font-size:15px;margin-bottom:2px">Load the Cart</div>
+                  <div style="font-size:12px;color:var(--txt3)">Enter how many of each item <strong style="color:var(--orange)">you're taking out</strong> to sell. Leave 0 to skip.</div>
+                </div>
+              </div>
+              <div class="cart-load-section" style="margin-top:16px;margin-bottom:0;padding:16px">
+                <div class="cart-load-title">Available Items</div>
+                <div id="cart-load-items"></div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:14px">
+                <button onclick="goBackToStep1()" style="background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--rm);padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">← Back</button>
+                <button class="btn-shift-start" style="flex:1" onclick="startShift()">▶ Start Shift</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ Active shift ══ -->
+      <div id="shift-active-view" style="display:none">
+        <div class="shift-hdr">
+          <div class="pulse"></div>
+          <div class="shift-hdr-info">
+            <div class="shift-hdr-name" id="shift-active-name">Shift</div>
+            <div class="shift-hdr-sub" id="shift-active-sub">Started at —</div>
+          </div>
+          <div class="shift-hdr-timer" id="shift-timer">00:00</div>
+          <button class="btn-end-shift" onclick="goEndShift()">🏁 End Shift</button>
+        </div>
+
+        <!-- Cart summary bar -->
+        <div class="shift-cart-bar" id="shift-cart-bar">
+          <span class="scb-label">Cart loaded:</span>
+          <div class="scb-chips" id="scb-chips-list"></div>
+        </div>
+
+        <div class="sec-label">Add More / Log Waste</div>
+        <div class="shift-item-grid" id="shift-item-grid"></div>
+
+        <div class="sec-label">Shift Log</div>
+        <div class="shift-log-preview" id="shift-log-preview">
+          <div style="font-size:12px;color:var(--txt3);text-align:center;padding:10px 0">No actions yet this shift.</div>
+        </div>
+      </div>
+
+      <!-- ══ End shift: improved returns table ══ -->
+      <div id="shift-end-view" style="display:none;max-width:640px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+          <button onclick="cancelEndShift()" style="background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--rm);padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">← Back</button>
+          <div>
+            <div style="font-family:'Unbounded',sans-serif;font-size:16px;font-weight:700;color:var(--txt)">🏁 End Shift — Count Returns</div>
+            <div style="font-size:12px;color:var(--txt3);margin-top:2px">Enter how many came back unsold. Sold = Taken − Returned.</div>
+          </div>
+        </div>
+
+        <!-- Returns table -->
+        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;margin-bottom:12px">
+          <div id="shift-return-list"></div>
+        </div>
+
+        <!-- Live totals -->
+        <div class="end-shift-totals" id="end-shift-totals">
+          <div class="est-total-item"><div class="est-total-lbl">Total Taken</div><div class="est-total-val c-orange" id="est-total-taken">0</div></div>
+          <div class="est-total-item"><div class="est-total-lbl">Total Sold</div><div class="est-total-val c-green" id="est-total-sold">0</div></div>
+          <div class="est-total-item"><div class="est-total-lbl">Est. Revenue</div><div class="est-total-val c-gold" id="est-total-rev">₱0</div></div>
+        </div>
+
+        <!-- Cash reconciliation -->
+        <div class="cash-recon">
+          <div class="cash-recon-title">💵 Cash Reconciliation</div>
+          <div class="cash-recon-row">
+            <span class="cash-recon-lbl">Opening Cash</span>
+            <span class="cash-recon-val c-txt2" id="recon-opening">₱0</span>
+          </div>
+          <div class="cash-recon-row">
+            <span class="cash-recon-lbl">Expected Revenue</span>
+            <span class="cash-recon-val c-gold" id="recon-expected">₱0</span>
+          </div>
+          <div class="cash-recon-row" style="margin-bottom:0">
+            <span class="cash-recon-lbl">Actual Cash Collected</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:13px;color:var(--gold);font-family:'DM Mono',monospace">₱</span>
+              <input class="cash-recon-input" id="recon-actual" type="number" min="0" step="0.01" placeholder="0.00" oninput="updateReconDiff()">
+              <span class="cash-recon-diff exact" id="recon-diff" style="display:none"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shift notes -->
+        <div id="shift-end-notes-wrap" style="margin-bottom:12px;display:none">
+          <div style="font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">📝 Shift Notes / Remarks</div>
+          <textarea id="shift-end-notes" placeholder="Optional: anything notable about this shift? (weather, issues, early close…)" style="width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rm);padding:10px 12px;font-size:13px;color:var(--txt);font-family:'DM Sans',sans-serif;resize:vertical;min-height:72px;line-height:1.5" onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--bdr2)'"></textarea>
+        </div>
+        <button class="btn-confirm-end" onclick="confirmEndShift()">✓ Confirm End Shift &amp; Save</button>
+      </div>
+
+    </div>
+
+    <!-- ══ Shift Summary Modal ══ -->
+    <div class="shift-summary-overlay" id="shift-summary-overlay">
+      <div class="shift-summary-box">
+        <div class="ssb-header">
+          <span class="ssb-icon">🎉</span>
+          <div>
+            <div class="ssb-title">Shift Complete!</div>
+            <div class="ssb-sub" id="ssb-subtitle">—</div>
+          </div>
+        </div>
+        <div class="ssb-stat-row" id="ssb-stats"></div>
+        <div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:8px">Breakdown</div>
+        <table class="ssb-table" id="ssb-table">
+          <thead><tr><th>Item</th><th>Taken</th><th>Sold</th><th>Returned</th><th>Waste</th><th>Pcs Left</th><th>Revenue</th></tr></thead>
+          <tbody id="ssb-tbody"></tbody>
+        </table>
+        <div id="ssb-recon-note" style="font-size:12px;margin-bottom:14px;padding:10px 12px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rs);color:var(--txt2)"></div>
+        <div id="ssb-shift-notes" style="font-size:12px;margin-bottom:14px;padding:10px 12px;background:var(--blue-l);border:1px solid var(--blue-b);border-radius:var(--rs);color:var(--blue);display:none"></div>
+        <button class="ssb-close" onclick="closeShiftSummary()">✓ Close & Archive Shift</button>
+      </div>
+    </div>
+    <div class="page" id="page-ledger">
+      <!-- Print-only header -->
+      <div class="print-header" id="print-header" style="margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #ccc;">
+        <div style="font-size:20px;font-weight:700;margin-bottom:4px">🛒 CartShift — Audit Ledger</div>
+        <div id="print-range-label" style="font-size:13px;color:#555;"></div>
+      </div>
+      <!-- Toolbar -->
+      <div class="ledger-toolbar" id="ledger-toolbar">
+        <input class="ledger-search" id="ledger-search" type="text" placeholder="🔍  Search item or vendor…" oninput="filterLedger()">
+        <input class="ledger-date" id="ledger-from" type="date" title="From date" onchange="filterLedger()">
+        <input class="ledger-date" id="ledger-to"   type="date" title="To date"   onchange="filterLedger()">
+        <button class="btn-print" onclick="clearLedgerDates()" title="Clear date filter">✕ Date</button>
+      </div>
+      <!-- Filter chips -->
+      <div class="ledger-chips" id="ledger-chips">
+        <div class="filter-chip active" onclick="setLedgerFilter('All',this)">All</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Delivery In',this)">Delivery In</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Shift Out',this)">Shift Out</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Shift Return',this)">Shift Return</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Waste',this)">Waste</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Batch Added',this)">Batch Added</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Batch Deleted',this)">Batch Deleted</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Item Added',this)">Item Added</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Delivery Edited',this)">Delivery Edited</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Delivery Deleted',this)">Delivery Deleted</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Adjustment',this)">Adjustment</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Manager Unlock',this)">Manager</div>
+      </div>
+      <div class="ledger-count" id="ledger-count"></div>
+      <!-- Table -->
+      <div class="ledger-table-wrap">
+        <table class="ledger-table" id="ledger-table">
+          <thead>
+            <tr>
+              <th>Date / Time</th>
+              <th>Item</th>
+              <th>Action</th>
+              <th>Qty Δ</th>
+              <th>Before</th>
+              <th>After</th>
+              <th>Cost</th>
+              <th>Vendor</th>
+              <th>Ref ID</th>
+              <th>By</th>
+            </tr>
+          </thead>
+          <tbody id="ledger-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="page" id="page-reports">
+      <div class="rpt-stat-row" id="rpt-stats"></div>
+      <!-- v8.6: Revenue trend chart -->
+      <div class="rpt-section" style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+          <div class="rpt-section-title" style="margin-bottom:0;flex:1">Revenue Trend</div>
+          <div style="display:flex;gap:6px">
+            <button id="trend-btn-weekly"  onclick="setTrendPeriod('weekly')"  class="filter-chip active" style="padding:4px 12px;font-size:11px">Weekly</button>
+            <button id="trend-btn-monthly" onclick="setTrendPeriod('monthly')" class="filter-chip"        style="padding:4px 12px;font-size:11px">Monthly</button>
+          </div>
+        </div>
+        <div id="rpt-trend-chart" style="overflow-x:auto;"></div>
+      </div>
+      <div class="rpt-section">
+        <div class="rpt-section-title">Top Items by Units Sold</div>
+        <div id="rpt-top-items"></div>
+      </div>
+      <div class="rpt-section">
+        <div class="rpt-section-title">Revenue by Shift (Last 10)</div>
+        <div id="rpt-shift-rev"></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-history">
+      <div style="font-size:13px;color:var(--txt3);margin-bottom:14px" id="hist-count-label">Loading history…</div>
+      <div id="hist-list"></div>
+    </div>
+    <div class="page" id="page-settings">
+      <div style="max-width:480px">
+        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:22px;margin-bottom:12px">
+          <div style="font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">🔐 Manager PIN</div>
+          <div style="font-size:13px;color:var(--txt2);margin-bottom:16px;line-height:1.6">The manager PIN protects editing and deleting deliveries and inventory batches. Session stays unlocked for 3 minutes after entry.<br><br>Default PIN: <span style="font-family:'DM Mono',monospace;color:var(--orange)">1234</span></div>
+          <button onclick="openChangePinFlow()" style="background:var(--orange-l);border:1px solid var(--orange-b);color:var(--orange);border-radius:var(--rm);padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .12s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">🔑 Change Manager PIN</button>
+        </div>
+
+        <!-- ── BACKUP & RESTORE ── -->
+        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:22px;margin-bottom:12px">
+          <div style="font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">💾 Data Backup & Restore</div>
+          <div style="font-size:13px;color:var(--txt2);margin-bottom:16px;line-height:1.6">Export a full backup of all your inventory, deliveries, shifts, and ledger. Import it anytime to restore — even on a different device or after a browser reset.<br><br><span style="color:var(--orange);font-weight:700">Tip:</span> Back up after every shift. Save the file to Google Drive or send via Viber for safekeeping.</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button onclick="exportBackup()" style="background:var(--green-l);border:1px solid var(--green-b);color:var(--green);border-radius:var(--rm);padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .12s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">⬇ Export Backup</button>
+            <button onclick="document.getElementById('import-file-input').click()" style="background:var(--blue-l);border:1px solid var(--blue-b);color:var(--blue);border-radius:var(--rm);padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .12s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">⬆ Import / Restore</button>
+            <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importBackup(this)">
+          </div>
+          <div id="backup-status" style="font-size:12px;margin-top:10px;min-height:18px;"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ ALERTS PAGE ═══ -->
+    <div class="page" id="page-alerts">
+      <div class="alerts-page-header">
+        <div class="alerts-summary-chips" id="alerts-summary-chips"></div>
+      </div>
+      <div id="alerts-oos-section"></div>
+      <div id="alerts-low-section"></div>
+      <div id="alerts-ok-section"></div>
+
+      <div class="sec-label" style="margin-top:24px">Restock Thresholds — Per Item Settings</div>
+      <div style="font-size:12px;color:var(--txt3);margin-bottom:12px;line-height:1.6">Set a <b style="color:var(--orange)">Target Qty</b> and a <b style="color:var(--orange)">Warn %</b> per item. LOW alert fires when stock drops below <em>Warn% × Target</em>. Changes auto-save.</div>
+      <div id="alerts-rst-list"></div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+</div><!-- /app-shell -->
+
+<!-- ═══ MANAGER PIN MODAL ═══ -->
+<div class="pin-overlay" id="pin-overlay">
+  <div class="pin-box">
+    <div class="pin-icon">🔐</div>
+    <div class="pin-title" id="pin-modal-title">Manager Access</div>
+    <div class="pin-sub" id="pin-modal-sub">Enter your 4-digit PIN to continue</div>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+    <div class="pin-pad">
+      <button class="pin-key" onclick="pinPress('1')">1</button>
+      <button class="pin-key" onclick="pinPress('2')">2</button>
+      <button class="pin-key" onclick="pinPress('3')">3</button>
+      <button class="pin-key" onclick="pinPress('4')">4</button>
+      <button class="pin-key" onclick="pinPress('5')">5</button>
+      <button class="pin-key" onclick="pinPress('6')">6</button>
+      <button class="pin-key" onclick="pinPress('7')">7</button>
+      <button class="pin-key" onclick="pinPress('8')">8</button>
+      <button class="pin-key" onclick="pinPress('9')">9</button>
+      <button class="pin-key del" onclick="pinClear()">✕ Clear</button>
+      <button class="pin-key" onclick="pinPress('0')">0</button>
+      <button class="pin-key del" onclick="pinBackspace()">⌫</button>
+    </div>
+    <button class="pin-cancel" onclick="closePinModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══ ADD ITEM MODAL ═══ -->
+<div class="modal-overlay" id="modal-add" onclick="closeModalOnBg(event)">
+  <div class="modal">
+    <div class="modal-title">Add New Item</div>
+    <div class="field-group">
+      <label class="field-lbl">Item Name</label>
+      <input class="field-input" id="m-name" type="text" placeholder="e.g. Beef Siomai">
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-lbl">Category</label>
+        <select class="field-input" id="m-category">
+          <option>Siomai</option><option>Drinks</option><option>Rice</option><option>Supplies</option><option>Custom</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-lbl">Unit</label>
+        <select class="field-input" id="m-unit">
+          <option>packs</option><option>pcs</option><option>portions</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-lbl">Cost Per Pack (₱)</label>
+        <input class="field-input" id="m-cost" type="number" min="0" placeholder="0" oninput="updateModalCalc()">
+      </div>
+      <div class="field-group">
+        <label class="field-lbl">Pcs Per Pack</label>
+        <input class="field-input" id="m-pcs-per-pack" type="number" min="1" placeholder="1" value="1" oninput="updateModalCalc()">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-lbl">Pcs Per Order/Serving</label>
+        <input class="field-input" id="m-pcs-per-order" type="number" min="1" placeholder="1" value="1" oninput="updateModalCalc()">
+      </div>
+      <div class="field-group">
+        <label class="field-lbl">Sell Price Per Order (₱)</label>
+        <input class="field-input" id="m-sell" type="number" min="0" placeholder="0" oninput="updateModalCalc()">
+      </div>
+    </div>
+    <div id="modal-calc-preview" style="background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--txt2);display:none">
+      <span id="mc-cpp"></span> &nbsp;&middot;&nbsp; <span id="mc-cpo"></span> &nbsp;&middot;&nbsp; <span id="mc-profit" style="font-weight:700"></span>
+    </div>
+    <div class="field-group">
+      <label class="field-lbl">Low Stock Threshold</label>
+      <input class="field-input" id="m-threshold" type="number" min="0" placeholder="5">
+    </div>
+    <div class="field-group">
+      <label class="field-lbl">Color Dot</label>
+      <div class="color-grid" id="color-grid">
+        <div class="color-swatch selected" data-color="orange" style="background:var(--orange)" onclick="selectColor(this)"></div>
+        <div class="color-swatch" data-color="blue"   style="background:var(--blue)"   onclick="selectColor(this)"></div>
+        <div class="color-swatch" data-color="green"  style="background:var(--green)"  onclick="selectColor(this)"></div>
+        <div class="color-swatch" data-color="purple" style="background:var(--purple)" onclick="selectColor(this)"></div>
+        <div class="color-swatch" data-color="red"    style="background:var(--red)"    onclick="selectColor(this)"></div>
+        <div class="color-swatch" data-color="gold"   style="background:var(--gold)"   onclick="selectColor(this)"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveNewItem()">+ Add Item</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════
+const DEFAULTS = [
+  {id:'try',   name:'TRy',            category:'Siomai',  color:'orange', unit:'packs',    sellPrice:0,  costPerPack:2,   pcsPerPack:1,  pcsPerOrder:1, threshold:5,  batches:[]},
+  {id:'csio',  name:'Chicken Siomai', category:'Siomai',  color:'orange', unit:'packs',    sellPrice:33, costPerPack:180, pcsPerPack:20, pcsPerOrder:4, threshold:2,  batches:[]},
+  {id:'psio',  name:'Pork Siomai',    category:'Siomai',  color:'blue',   unit:'packs',    sellPrice:33, costPerPack:180, pcsPerPack:20, pcsPerOrder:4, threshold:2,  batches:[]},
+  {id:'jsio',  name:'Japanese Siomai',category:'Siomai',  color:'green',  unit:'packs',    sellPrice:40, costPerPack:200, pcsPerPack:20, pcsPerOrder:4, threshold:2,  batches:[]},
+  {id:'bsio',  name:'Beef Siomai',    category:'Siomai',  color:'purple', unit:'packs',    sellPrice:45, costPerPack:220, pcsPerPack:20, pcsPerOrder:4, threshold:2,  batches:[]},
+  {id:'coke',  name:'Coke',           category:'Drinks',  color:'red',    unit:'pcs',      sellPrice:30, costPerPack:25,  pcsPerPack:1,  pcsPerOrder:1, threshold:5,  batches:[]},
+  {id:'oj',    name:'Orange Juice',   category:'Drinks',  color:'gold',   unit:'pcs',      sellPrice:25, costPerPack:20,  pcsPerPack:1,  pcsPerOrder:1, threshold:5,  batches:[]},
+  {id:'sprite',name:'Sprite',         category:'Drinks',  color:'blue',   unit:'pcs',      sellPrice:30, costPerPack:25,  pcsPerPack:1,  pcsPerOrder:1, threshold:5,  batches:[]},
+  {id:'rice',  name:'Rice',           category:'Rice',    color:'green',  unit:'portions', sellPrice:10, costPerPack:5,   pcsPerPack:1,  pcsPerOrder:1, threshold:10, batches:[]},
+  {id:'silver',name:'Silver Packs',   category:'Supplies',color:'txt2',   unit:'pcs',      sellPrice:0,  costPerPack:0,   pcsPerPack:1,  pcsPerOrder:1, threshold:10, batches:[]},
+];
+
+function loadState(){
+  try{
+    const s=localStorage.getItem('cs_inv_v1');
+    if(s){
+      const parsed = JSON.parse(s);
+      // Migrate: ensure all items have pcsPerPack and pcsPerOrder
+      if(parsed.items){
+        parsed.items.forEach(item=>{
+          if(item.pcsPerPack == null) item.pcsPerPack = 1;
+          if(item.pcsPerOrder == null) item.pcsPerOrder = 1;
+        });
+      }
+      return parsed;
+    }
+  }catch(e){}
+  return {items:JSON.parse(JSON.stringify(DEFAULTS))};
+}
+function saveState(){
+  try{localStorage.setItem('cs_inv_v1',JSON.stringify(state));}catch(e){}
+}
+let state = loadState();
+
+// ═══════════════════════════════════════
+//  AUDIT LOG (immutable — never deleted)
+// ═══════════════════════════════════════
+const AUDIT_KEY = 'cs_audit_log_v1';
+let auditEntries = [];
+
+function loadAudit(){
+  try{ const d=localStorage.getItem(AUDIT_KEY); if(d) auditEntries=JSON.parse(d); }catch(e){ auditEntries=[]; }
+}
+function saveAudit(){
+  try{ localStorage.setItem(AUDIT_KEY,JSON.stringify(auditEntries)); }catch(e){}
+}
+loadAudit();
+
+/**
+ * Write one immutable audit log entry.
+ * action: string label (e.g. 'Delivery In', 'Batch Added', ...)
+ * data:   { item, qty, before, after, cost, vendor, refId, by }
+ */
+function writeLog(action, data={}){
+  const entry = {
+    id:     'LOG-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),
+    ts:     new Date().toISOString(),
+    action,
+    item:   data.item   || '',
+    qty:    data.qty    !== undefined ? data.qty : null,
+    before: data.before !== undefined ? data.before : null,
+    after:  data.after  !== undefined ? data.after  : null,
+    cost:   data.cost   !== undefined ? data.cost   : null,
+    vendor: data.vendor || '',
+    refId:  data.refId  || '',
+    by:     data.by     || (isSessionActive() ? 'Manager' : 'Staff'),
+  };
+  auditEntries.unshift(entry);  // newest first
+  saveAudit();
+}
+
+function fmtLogDate(isoStr){
+  const d = new Date(isoStr);
+  const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+  const dd = String(d.getDate()).padStart(2,'0');
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mm = String(d.getMinutes()).padStart(2,'0');
+  const ap = d.getHours()<12?'AM':'PM';
+  const h12 = d.getHours()%12||12;
+  return { date:`${mo} ${dd}`, time:`${String(h12).padStart(2,'0')}:${mm} ${ap}` };
+}
+
+function actionBadgeClass(action){
+  const map = {
+    'Delivery In':      'ldg-delivery',
+    'Batch Added':      'ldg-delivery',
+    'Batch Deleted':    'ldg-batch-del',
+    'Item Added':       'ldg-item-add',
+    'Item Deleted':     'ldg-item-del',
+    'Delivery Edited':  'ldg-del-edit',
+    'Delivery Deleted': 'ldg-del-del',
+    'Manager Unlock':   'ldg-mgr',
+    'PIN Changed':      'ldg-mgr',
+    'Shift Out':        'ldg-shift-out',
+    'Shift Return':     'ldg-shift-return',
+    'Waste':            'ldg-batch-del',
+    'Adjustment':       'ldg-adjustment',
+    'Shift Started':    'ldg-item-add',
+    'Shift Ended':      'ldg-mgr',
+  };
+  return map[action] || 'ldg-adjustment';
+}
+
+// ─── LEDGER RENDER ───────────────────────────────────────────
+let ledgerFilterAction = 'All';
+
+function setLedgerFilter(f, el){
+  ledgerFilterAction = f;
+  document.querySelectorAll('#ledger-chips .filter-chip').forEach(c=>c.classList.remove('active'));
+  if(el) el.classList.add('active');
+  filterLedger();
+}
+
+function clearLedgerDates(){
+  document.getElementById('ledger-from').value = '';
+  document.getElementById('ledger-to').value   = '';
+  filterLedger();
+}
+
+function filterLedger(){
+  const search = (document.getElementById('ledger-search')?.value||'').toLowerCase();
+  const fromV  = document.getElementById('ledger-from')?.value;
+  const toV    = document.getElementById('ledger-to')?.value;
+  const fromTs = fromV ? new Date(fromV).getTime() : null;
+  const toTs   = toV   ? new Date(toV+'T23:59:59').getTime() : null;
+
+  const filtered = auditEntries.filter(e=>{
+    if(ledgerFilterAction !== 'All' && e.action !== ledgerFilterAction) return false;
+    const ts = new Date(e.ts).getTime();
+    if(fromTs && ts < fromTs) return false;
+    if(toTs   && ts > toTs  ) return false;
+    if(search){
+      const hay = (e.item+e.vendor+e.refId+e.action).toLowerCase();
+      if(!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  renderLedgerRows(filtered);
+}
+
+function renderLedger(){
+  // Update print range label
+  document.getElementById('print-range-label').textContent =
+    'Printed: ' + new Date().toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'});
+  filterLedger();
+}
+
+function renderLedgerRows(entries){
+  const tbody  = document.getElementById('ledger-tbody');
+  const countEl = document.getElementById('ledger-count');
+  if(!tbody) return;
+  countEl.textContent = `${entries.length} record${entries.length===1?'':'s'}`;
+
+  if(entries.length === 0){
+    tbody.innerHTML = `<tr><td colspan="10"><div class="ledger-empty"><span style="font-size:32px;display:block;margin-bottom:10px;opacity:.3">📋</span><div style="font-size:14px;color:var(--txt2);font-weight:600">No log entries yet</div><div style="font-size:12px;margin-top:4px">Actions like adding deliveries and batches will appear here.</div></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = entries.map(e=>{
+    const {date, time} = fmtLogDate(e.ts);
+    const badge = `<span class="ldg-badge ${actionBadgeClass(e.action)}">${e.action}</span>`;
+    const qtyStr = e.qty === null ? '<span class="td-qty-neu">—</span>'
+                 : e.qty > 0  ? `<span class="td-qty-pos">+${e.qty}</span>`
+                 : e.qty < 0  ? `<span class="td-qty-neg">${e.qty}</span>`
+                 : `<span class="td-qty-neu">0</span>`;
+    const beforeStr = e.before !== null ? `<span class="td-qty-neu">${e.before}</span>` : '<span class="td-qty-neu">—</span>';
+    const afterStr  = e.after  !== null ? `<span class="td-qty-neu">${e.after}</span>`  : '<span class="td-qty-neu">—</span>';
+    const costStr   = e.cost   !== null ? `<span class="td-cost">₱${Number(e.cost).toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:2})}</span>` : '<span class="td-qty-neu">—</span>';
+    const byColor   = e.by==='Manager'?'var(--orange)':'var(--txt2)';
+    const shortRef  = e.refId ? e.refId.replace('DEL-','').replace('LOG-','').slice(-8) : '—';
+
+    return `<tr id="lrow-${e.id}" title="${e.id}">
+      <td class="td-dt">${date}<br>${time}</td>
+      <td class="td-item">${e.item||'<span style="color:var(--txt3)">—</span>'}</td>
+      <td>${badge}</td>
+      <td>${qtyStr}</td>
+      <td>${beforeStr}</td>
+      <td>${afterStr}</td>
+      <td>${costStr}</td>
+      <td style="font-size:12px;color:var(--txt2)">${e.vendor||'—'}</td>
+      <td class="td-ref">${shortRef}</td>
+      <td class="td-by" style="color:${byColor};font-weight:600;font-size:12px">${e.by||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function printLedger(){
+  window.print();
+}
+
+function exportLedgerCSV(){
+  // Collect the currently filtered entries (respects search / date / chip filters)
+  const search = (document.getElementById('ledger-search')?.value||'').toLowerCase();
+  const fromV  = document.getElementById('ledger-from')?.value;
+  const toV    = document.getElementById('ledger-to')?.value;
+  const fromTs = fromV ? new Date(fromV).getTime() : null;
+  const toTs   = toV   ? new Date(toV+'T23:59:59').getTime() : null;
+
+  const rows = auditEntries.filter(e=>{
+    if(ledgerFilterAction !== 'All' && e.action !== ledgerFilterAction) return false;
+    const ts = new Date(e.ts).getTime();
+    if(fromTs && ts < fromTs) return false;
+    if(toTs   && ts > toTs  ) return false;
+    if(search){
+      const hay = (e.item+e.vendor+e.refId+e.action).toLowerCase();
+      if(!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  if(!rows.length){ alert('No ledger entries match the current filter — nothing to export.'); return; }
+
+  // CSV helpers
+  function esc(v){ const s = v==null?'':String(v); return '"'+s.replace(/"/g,'""')+'"'; }
+  function fmtPHP(v){ return v===null||v===undefined?'':Number(v).toFixed(2); }
+
+  const header = ['Date','Time','Item','Action','Qty Change','Stock Before','Stock After','Cost (PHP)','Vendor','Ref ID','By'];
+  const lines  = [header.map(esc).join(',')];
+
+  rows.forEach(e=>{
+    const d   = new Date(e.ts);
+    const datePart = d.toLocaleDateString('en-PH',{year:'numeric',month:'2-digit',day:'2-digit'});
+    const timePart = d.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',hour12:true});
+    lines.push([
+      esc(datePart),
+      esc(timePart),
+      esc(e.item),
+      esc(e.action),
+      esc(e.qty===null?'':e.qty),
+      esc(e.before===null?'':e.before),
+      esc(e.after===null?'':e.after),
+      esc(e.cost===null?'':fmtPHP(e.cost)),
+      esc(e.vendor),
+      esc(e.refId),
+      esc(e.by),
+    ].join(','));
+  });
+
+  const bom  = '\uFEFF'; // UTF-8 BOM so Excel opens ₱ correctly
+  const blob = new Blob([bom + lines.join('\r\n')], {type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const dateStr = new Date().toISOString().slice(0,10);
+  const filterLabel = ledgerFilterAction==='All' ? 'all' : ledgerFilterAction.toLowerCase().replace(/\s+/g,'-');
+  a.href     = url;
+  a.download = `cartshift-ledger-${filterLabel}-${dateStr}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════
+//  SHIFTS ENGINE
+// ═══════════════════════════════════════
+const SHIFT_KEY   = 'cs_active_shift_v1';
+const HISTORY_KEY = 'cs_shift_history_v1';
+
+let activeShift  = null;
+let shiftHistory = [];
+let shiftTimerInterval = null;
+
+function loadShiftState(){
+  try{ const d=localStorage.getItem(SHIFT_KEY);   if(d) activeShift  = JSON.parse(d); }catch(e){ activeShift=null; }
+  try{ const d=localStorage.getItem(HISTORY_KEY); if(d) shiftHistory = JSON.parse(d); }catch(e){ shiftHistory=[]; }
+}
+function saveActiveShift(){ try{ localStorage.setItem(SHIFT_KEY, JSON.stringify(activeShift)); }catch(e){} }
+function saveShiftHistory(){ try{ localStorage.setItem(HISTORY_KEY, JSON.stringify(shiftHistory)); }catch(e){} }
+loadShiftState();
+
+// ── Deduct qty from inventory using FIFO, returns actual cost deducted
+function deductFIFO(item, qtyToDeduct){
+  let remaining = qtyToDeduct;
+  let totalCost = 0;
+  for(let b of item.batches){
+    if(remaining <= 0) break;
+    const take = Math.min(b.qty, remaining);
+    totalCost += take * (b.unitCost||0);
+    b.qty -= take;
+    remaining -= take;
+  }
+  item.batches = item.batches.filter(b=>b.qty>0);
+  return totalCost;
+}
+
+// ── Add qty back to inventory (returns)
+function addReturn(item, qty, shiftId){
+  item.batches.push({ qty, unitCost:0, date:todayStr(), shiftReturn:true, shiftId });
+}
+
+// ─────────────────────────────────────
+//  START SHIFT — multi-step flow
+// ─────────────────────────────────────
+function goToLoadCart(){
+  const name = document.getElementById('shift-staff-name')?.value.trim();
+  if(!name){ alert('Please enter a staff name.'); return; }
+  // Show step 2
+  document.getElementById('shift-step1-panel').style.display = 'none';
+  document.getElementById('shift-step2-panel').style.display = 'block';
+  // Update step indicators
+  document.getElementById('step-num-1').className = 'shift-step-num done';
+  document.getElementById('step-lbl-1').className = 'shift-step-label';
+  document.getElementById('step-num-2').className = 'shift-step-num active';
+  document.getElementById('step-lbl-2').className = 'shift-step-label active';
+  // Build cart load items list
+  renderCartLoadItems();
+}
+
+function goBackToStep1(){
+  document.getElementById('shift-step1-panel').style.display = 'block';
+  document.getElementById('shift-step2-panel').style.display = 'none';
+  document.getElementById('step-num-1').className = 'shift-step-num active';
+  document.getElementById('step-lbl-1').className = 'shift-step-label active';
+  document.getElementById('step-num-2').className = 'shift-step-num';
+  document.getElementById('step-lbl-2').className = 'shift-step-label';
+}
+
+function renderCartLoadItems(){
+  const el = document.getElementById('cart-load-items');
+  const items = state.items.filter(i=>itemQty(i)>0);
+  if(!items.length){
+    el.innerHTML = `<div class="cart-load-empty">No items in stock yet.<br>Add stock via Inventory first.</div>`;
+    return;
+  }
+  el.innerHTML = items.map(item=>{
+    const qty = itemQty(item);
+    return `<div class="cart-load-item">
+      <div class="cli-dot" style="${dotStyle(item.color)}"></div>
+      <div style="flex:1">
+        <div class="cli-name">${item.name}</div>
+        <div class="cli-stock">${qty} ${item.unit} in stock</div>
+      </div>
+      <input class="cli-qty" id="cload-${item.id}" type="number" value="0" min="0" max="${qty}" placeholder="0" oninput="clampCartLoad('${item.id}',${qty})">
+    </div>`;
+  }).join('');
+}
+
+function clampCartLoad(itemId, max){
+  const el = document.getElementById('cload-'+itemId);
+  if(!el) return;
+  const v = parseInt(el.value||0);
+  if(v > max) el.value = max;
+  if(v < 0)   el.value = 0;
+}
+
+function startShift(){
+  const name = document.getElementById('shift-staff-name')?.value.trim();
+  if(!name){ alert('Please enter a staff name.'); return; }
+  const openingCash = parseFloat(document.getElementById('shift-opening-cash')?.value||0);
+
+  activeShift = {
+    id:          'SHF-'+Date.now(),
+    staff:       name,
+    startedAt:   new Date().toISOString(),
+    openingCash: openingCash,
+    cartLoads:   [],  // items pre-loaded at start
+    outs:        [],  // mid-shift additional outs
+    wastes:      [],
+  };
+
+  // Process cart loads — deduct from inventory immediately
+  const items = state.items.filter(i=>itemQty(i)>0);
+  items.forEach(item=>{
+    const el = document.getElementById('cload-'+item.id);
+    const qty = parseInt(el?.value||0);
+    if(qty<=0) return;
+    const available = itemQty(item);
+    const take = Math.min(qty, available);
+    const before = available;
+    const cost = deductFIFO(item, take);
+    const after = itemQty(item);
+    activeShift.cartLoads.push({ itemId:item.id, itemName:item.name, qty:take, cost, unitSell:item.sellPrice, ts:new Date().toISOString() });
+    writeLog('Shift Out', {
+      item:   item.name,
+      qty:    -take,
+      before,
+      after,
+      cost,
+      refId:  activeShift.id,
+      by:     name,
+      vendor: 'Cart Load',
+    });
+  });
+
+  saveState();
+  saveActiveShift();
+  writeLog('Shift Started', {item:'', by:name, refId:activeShift.id, vendor:`Opening Cash ₱${openingCash}`, qty:null});
+  renderShiftsPage();
+  renderDashboard();
+}
+
+// ─────────────────────────────────────
+//  RENDER SHIFTS PAGE
+// ─────────────────────────────────────
+function renderShiftsPage(){
+  const idle   = document.getElementById('shift-idle-view');
+  const active = document.getElementById('shift-active-view');
+  const endV   = document.getElementById('shift-end-view');
+  if(!idle) return;
+
+  if(!activeShift){
+    idle.style.display   = 'block';
+    active.style.display = 'none';
+    endV.style.display   = 'none';
+    clearInterval(shiftTimerInterval);
+    // Reset step UI
+    const sn1=document.getElementById('step-num-1'); if(sn1) sn1.className='shift-step-num active';
+    const sl1=document.getElementById('step-lbl-1'); if(sl1) sl1.className='shift-step-label active';
+    const sn2=document.getElementById('step-num-2'); if(sn2) sn2.className='shift-step-num';
+    const sl2=document.getElementById('step-lbl-2'); if(sl2) sl2.className='shift-step-label';
+    const sn3=document.getElementById('step-num-3'); if(sn3) sn3.className='shift-step-num';
+    const sl3=document.getElementById('step-lbl-3'); if(sl3) sl3.className='shift-step-label';
+    const p1=document.getElementById('shift-step1-panel'); if(p1) p1.style.display='block';
+    const p2=document.getElementById('shift-step2-panel'); if(p2) p2.style.display='none';
+    const sname=document.getElementById('shift-staff-name'); if(sname) sname.value='';
+    const scash=document.getElementById('shift-opening-cash'); if(scash) scash.value='';
+    return;
+  }
+
+  idle.style.display   = 'none';
+  active.style.display = 'block';
+  endV.style.display   = 'none';
+
+  document.getElementById('shift-active-name').textContent = `${activeShift.staff}'s Shift`;
+  document.getElementById('shift-active-sub').textContent  = `Started ${fmtTime(activeShift.startedAt)}`;
+
+  // Cart bar — show what was loaded at start
+  const cartBar = document.getElementById('shift-cart-bar');
+  const chipsList = document.getElementById('scb-chips-list');
+  const loads = activeShift.cartLoads || [];
+  if(loads.length && chipsList){
+    chipsList.innerHTML = loads.map(l=>`<span class="scb-chip">${l.itemName} × ${l.qty}</span>`).join('');
+    if(cartBar) cartBar.style.display='flex';
+  } else {
+    if(cartBar) cartBar.style.display='none';
+  }
+
+  // Timer
+  clearInterval(shiftTimerInterval);
+  function tickTimer(){
+    const elapsed = Math.floor((Date.now()-new Date(activeShift.startedAt).getTime())/1000);
+    const h = Math.floor(elapsed/3600);
+    const m = Math.floor((elapsed%3600)/60);
+    const s = elapsed%60;
+    const el = document.getElementById('shift-timer');
+    if(el) el.textContent = (h?`${h}:`:'') + String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }
+  tickTimer();
+  shiftTimerInterval = setInterval(tickTimer, 1000);
+
+  // Item grid — mid-shift additional outs/waste
+  const grid = document.getElementById('shift-item-grid');
+  const sellable = state.items.filter(i=>i.sellPrice>0 || itemQty(i)>0);
+  if(!sellable.length){
+    grid.innerHTML = `<div style="font-size:13px;color:var(--txt3);padding:10px 0">No items with stock available.</div>`;
+  } else {
+    grid.innerHTML = sellable.map(item=>{
+      const qty = itemQty(item);
+      const addOuts = activeShift.outs.filter(o=>o.itemId===item.id).reduce((s,o)=>s+o.qty,0);
+      const tallyHtml = addOuts > 0 ? `<div class="sic-out-tally">+ ${addOuts} added out this shift</div>` : '';
+      const sellPrice = item.sellPrice || 0;
+      const ppo = item.pcsPerOrder || 1;
+      const priceLabel = sellPrice > 0
+        ? `<div class="sic-price">₱${sellPrice} / ${ppo > 1 ? ppo+'pcs' : 'order'}</div>`
+        : `<div class="sic-price" style="color:var(--red)">⚠ No sell price set</div>`;
+      return `<div class="shift-item-card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
+          <div class="sic-name">${item.name}</div>
+          ${priceLabel}
+        </div>
+        <div class="sic-stock" style="color:${qty===0?'var(--red)':qty<=item.threshold?'var(--gold)':'var(--txt3)'}">
+          ${qty} ${item.unit} in stock${qty===0?' · OUT':qty<=item.threshold?' · LOW':''}
+        </div>
+        <div class="sic-controls">
+          <input class="sic-qty" id="sqty-${item.id}" type="number" value="1" min="1" max="${Math.max(qty,99)}">
+          <button class="btn-sic btn-sic-out" onclick="shiftOut('${item.id}')" ${qty===0?'disabled style="opacity:.4;cursor:not-allowed"':''}>Take Out</button>
+          <button class="btn-sic btn-sic-waste" onclick="shiftWaste('${item.id}')" ${qty===0?'disabled style="opacity:.4;cursor:not-allowed"':''}>Waste</button>
+        </div>
+        ${tallyHtml}
+      </div>`;
+    }).join('');
+  }
+
+  // Shift log preview
+  renderShiftLogPreview();
+}
+
+function renderShiftLogPreview(){
+  const el = document.getElementById('shift-log-preview');
+  if(!activeShift||!el) return;
+  const all = [
+    ...(activeShift.cartLoads||[]).map(o=>({...o, type:'load'})),
+    ...activeShift.outs.map(o=>({...o, type:'out'})),
+    ...activeShift.wastes.map(w=>({...w, type:'waste'})),
+  ].sort((a,b)=>new Date(b.ts)-new Date(a.ts)).slice(0,10);
+
+  if(!all.length){
+    el.innerHTML = '<div style="font-size:12px;color:var(--txt3);text-align:center;padding:10px 0">No actions yet this shift.</div>';
+    return;
+  }
+  el.innerHTML = all.map(e=>{
+    const badge = e.type==='load'
+      ? `<span class="ldg-badge ldg-delivery">Cart Load</span>`
+      : e.type==='out'
+      ? `<span class="ldg-badge ldg-shift-out">Shift Out</span>`
+      : `<span class="ldg-badge ldg-batch-del">Waste</span>`;
+    const color = e.type==='load'?'var(--green)':e.type==='out'?'var(--orange)':'var(--red)';
+    return `<div class="shift-log-row">
+      ${badge}
+      <span style="flex:1;color:var(--txt)">${e.itemName}</span>
+      <span style="color:${color};font-family:'DM Mono',monospace;font-weight:700">-${e.qty}</span>
+      <span style="color:var(--txt3);font-size:11px">${fmtTime(e.ts)}</span>
+    </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────
+//  SHIFT OUT
+// ─────────────────────────────────────
+function shiftOut(itemId){
+  if(!activeShift) return;
+  const item = state.items.find(i=>i.id===itemId);
+  if(!item) return;
+  const qty = parseInt(document.getElementById('sqty-'+itemId)?.value||1);
+  if(qty<=0) return;
+  const available = itemQty(item);
+  if(qty > available){ alert(`Only ${available} ${item.unit} available.`); return; }
+
+  const before = available;
+  const cost   = deductFIFO(item, qty);
+  const after  = itemQty(item);
+  saveState();
+
+  activeShift.outs.push({ itemId, itemName:item.name, qty, cost, unitSell:item.sellPrice, ts:new Date().toISOString() });
+  saveActiveShift();
+
+  writeLog('Shift Out', {
+    item:   item.name,
+    qty:    -qty,
+    before,
+    after,
+    cost,
+    refId:  activeShift.id,
+    by:     activeShift.staff,
+    vendor: '',
+  });
+
+  renderShiftsPage();
+}
+
+// ─────────────────────────────────────
+//  WASTE
+// ─────────────────────────────────────
+function shiftWaste(itemId){
+  if(!activeShift) return;
+  const item = state.items.find(i=>i.id===itemId);
+  if(!item) return;
+  const qty = parseInt(document.getElementById('sqty-'+itemId)?.value||1);
+  if(qty<=0) return;
+  const available = itemQty(item);
+  if(qty > available){ alert(`Only ${available} ${item.unit} available.`); return; }
+
+  const before = available;
+  const cost   = deductFIFO(item, qty);
+  const after  = itemQty(item);
+  saveState();
+
+  activeShift.wastes.push({ itemId, itemName:item.name, qty, cost, ts:new Date().toISOString() });
+  saveActiveShift();
+
+  writeLog('Waste', {
+    item:   item.name,
+    qty:    -qty,
+    before,
+    after,
+    cost,
+    refId:  activeShift.id,
+    by:     activeShift.staff,
+  });
+
+  renderShiftsPage();
+}
+
+// ─────────────────────────────────────
+//  END SHIFT — step 1: show return form
+// ─────────────────────────────────────
+function goEndShift(){
+  if(!activeShift) return;
+  const idle   = document.getElementById('shift-idle-view');
+  const active = document.getElementById('shift-active-view');
+  const endV   = document.getElementById('shift-end-view');
+  idle.style.display   = 'none';
+  active.style.display = 'none';
+  endV.style.display   = 'block';
+  clearInterval(shiftTimerInterval);
+
+  // Aggregate all items taken out (cartLoads + mid-shift outs)
+  const takenMap = {};
+  const allOuts = [...(activeShift.cartLoads||[]), ...(activeShift.outs||[])];
+  allOuts.forEach(o=>{
+    if(!takenMap[o.itemId]) takenMap[o.itemId] = {itemId:o.itemId, itemName:o.itemName, qty:0, totalCost:0, unitSell:o.unitSell||0};
+    takenMap[o.itemId].qty += o.qty;
+    takenMap[o.itemId].totalCost += o.cost||0;
+  });
+  const taken = Object.values(takenMap);
+
+  const list = document.getElementById('shift-return-list');
+  if(!taken.length){
+    list.innerHTML = `<div style="padding:24px;text-align:center;font-size:13px;color:var(--txt3)">No items were taken out this shift.</div>`;
+  } else {
+    list.innerHTML = `<table class="end-shift-table">
+      <thead><tr>
+        <th>Item</th>
+        <th style="text-align:center">Taken</th>
+        <th style="text-align:center">Returned</th>
+        <th style="text-align:center">Waste</th>
+        <th style="text-align:center">Sold</th>
+        <th style="text-align:center">Pcs Left</th>
+        <th style="text-align:right">Est. Revenue</th>
+      </tr></thead>
+      <tbody>
+        ${taken.map(t=>{
+          const item = state.items.find(i=>i.id===t.itemId);
+          const wasteQty = (activeShift?.wastes||[]).filter(w=>w.itemId===t.itemId).reduce((s,w)=>s+w.qty,0);
+          const initRev = item ? revenueFromPacks(item, t.qty) : t.qty*t.unitSell;
+          const initPcsLeft = item ? pcsLeftFromPacks(item, t.qty, t.qty, wasteQty) : 0;
+          return `<tr>
+          <td class="est-name">${t.itemName}</td>
+          <td style="text-align:center"><span class="est-taken">${t.qty}</span></td>
+          <td style="text-align:center">
+            <input class="est-return-input" id="ret-${t.itemId}" type="number" value="0" min="0" max="${t.qty}" placeholder="0"
+              oninput="updateEndShiftCalc()" onchange="clampReturn('${t.itemId}',${t.qty})">
+          </td>
+          <td style="text-align:center;color:var(--red);font-weight:600"><span id="waste-${t.itemId}">${wasteQty>0?wasteQty:'—'}</span></td>
+          <td style="text-align:center"><span class="est-sold" id="sold-${t.itemId}">${t.qty}</span></td>
+          <td style="text-align:center;color:var(--blue);font-size:11px;font-family:'DM Mono',monospace"><span id="pcsleft-${t.itemId}">${item?initPcsLeft+' pcs':'—'}</span></td>
+          <td style="text-align:right"><span class="est-rev" id="rev-${t.itemId}">₱${initRev.toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:0})}</span></td>
+        </tr>`;}).join('')}
+      </tbody>
+    </table>`;
+  }
+  // Add shift notes field
+  const notesWrap = document.getElementById('shift-end-notes-wrap');
+  if(notesWrap) notesWrap.style.display='block';
+
+  // Populate cash recon opening
+  const opening = activeShift.openingCash || 0;
+  const openEl = document.getElementById('recon-opening');
+  if(openEl) openEl.textContent = '₱'+opening.toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:2});
+
+  updateEndShiftCalc();
+}
+
+function clampReturn(itemId, max){
+  const el = document.getElementById('ret-'+itemId);
+  if(!el) return;
+  const v = parseInt(el.value||0);
+  if(v > max) el.value = max;
+  if(v < 0)   el.value = 0;
+  updateEndShiftCalc();
+}
+
+function updateEndShiftCalc(){
+  const allOuts = [...(activeShift?.cartLoads||[]), ...(activeShift?.outs||[])];
+  const takenMap = {};
+  allOuts.forEach(o=>{
+    if(!takenMap[o.itemId]) takenMap[o.itemId]={itemId:o.itemId,qty:0,unitSell:o.unitSell||0};
+    takenMap[o.itemId].qty += o.qty;
+  });
+
+  let totalTaken=0, totalSold=0, totalRev=0;
+  Object.values(takenMap).forEach(t=>{
+    const item = state.items.find(i=>i.id===t.itemId);
+    const retEl = document.getElementById('ret-'+t.itemId);
+    const ret = Math.max(0, Math.min(parseInt(retEl?.value||0), t.qty));
+    const sold = t.qty - ret;
+    // Use pack→order revenue calculation if item has pcs-per-pack setup
+    const rev = item ? revenueFromPacks(item, sold) : sold * t.unitSell;
+    // Waste pcs
+    const wasteQty = (activeShift?.wastes||[]).filter(w=>w.itemId===t.itemId).reduce((s,w)=>s+w.qty,0);
+    const pcsLeft = item ? pcsLeftFromPacks(item, t.qty, sold, wasteQty) : 0;
+    totalTaken += t.qty;
+    totalSold  += sold;
+    totalRev   += rev;
+    const soldEl    = document.getElementById('sold-'+t.itemId);
+    const revEl     = document.getElementById('rev-'+t.itemId);
+    const pcsLeftEl = document.getElementById('pcsleft-'+t.itemId);
+    const wasteEl   = document.getElementById('waste-'+t.itemId);
+    if(soldEl) soldEl.textContent = sold;
+    if(revEl)  revEl.textContent  = '₱'+rev.toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:0});
+    if(pcsLeftEl) pcsLeftEl.textContent = item ? pcsLeft+' pcs' : '—';
+    if(wasteEl)   wasteEl.textContent   = wasteQty > 0 ? wasteQty : '—';
+  });
+
+  const takenEl = document.getElementById('est-total-taken');
+  const soldEl  = document.getElementById('est-total-sold');
+  const revEl   = document.getElementById('est-total-rev');
+  if(takenEl) takenEl.textContent = totalTaken;
+  if(soldEl)  soldEl.textContent  = totalSold;
+  if(revEl)   revEl.textContent   = '₱'+totalRev.toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:0});
+
+  // update recon expected
+  const expEl = document.getElementById('recon-expected');
+  if(expEl) expEl.textContent = '₱'+totalRev.toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:2});
+  updateReconDiff();
+}
+
+function updateReconDiff(){
+  const allOuts = [...(activeShift?.cartLoads||[]), ...(activeShift?.outs||[])];
+  const takenMap = {};
+  allOuts.forEach(o=>{
+    if(!takenMap[o.itemId]) takenMap[o.itemId]={itemId:o.itemId,qty:0,unitSell:o.unitSell||0};
+    takenMap[o.itemId].qty += o.qty;
+  });
+  let expectedRev = 0;
+  Object.values(takenMap).forEach(t=>{
+    const item = state.items.find(i=>i.id===t.itemId);
+    const retEl = document.getElementById('ret-'+t.itemId);
+    const ret = Math.max(0, Math.min(parseInt(retEl?.value||0), t.qty));
+    const sold = t.qty - ret;
+    expectedRev += item ? revenueFromPacks(item, sold) : sold * t.unitSell;
+  });
+
+  const opening = activeShift?.openingCash || 0;
+  const actualEl = document.getElementById('recon-actual');
+  const diffEl   = document.getElementById('recon-diff');
+  if(!actualEl || !diffEl) return;
+  const actual = parseFloat(actualEl.value||'');
+  if(isNaN(actual)){ diffEl.style.display='none'; return; }
+
+  const expected = opening + expectedRev;
+  const diff = actual - expected;
+  diffEl.style.display = 'inline-block';
+  if(Math.abs(diff) < 0.01){
+    diffEl.className = 'cash-recon-diff exact';
+    diffEl.textContent = 'Exact ✓';
+  } else if(diff > 0){
+    diffEl.className = 'cash-recon-diff over';
+    diffEl.textContent = `+₱${diff.toFixed(2)} over`;
+  } else {
+    diffEl.className = 'cash-recon-diff short';
+    diffEl.textContent = `-₱${Math.abs(diff).toFixed(2)} short`;
+  }
+}
+
+function cancelEndShift(){
+  renderShiftsPage();
+}
+
+// ─────────────────────────────────────
+//  END SHIFT — step 2: save everything
+// ─────────────────────────────────────
+function confirmEndShift(){
+  if(!activeShift) return;
+
+  // Aggregate all outs (cart loads + mid-shift)
+  const allOuts = [...(activeShift.cartLoads||[]), ...(activeShift.outs||[])];
+  const takenMap = {};
+  allOuts.forEach(o=>{
+    if(!takenMap[o.itemId]) takenMap[o.itemId] = {itemId:o.itemId, itemName:o.itemName, takenQty:0, totalCost:0, unitSell:o.unitSell||0};
+    takenMap[o.itemId].takenQty += o.qty;
+    takenMap[o.itemId].totalCost += o.cost||0;
+  });
+
+  let totalRevenue = 0;
+  let totalCogs    = 0;
+  const returnsSummary = [];
+
+  Object.values(takenMap).forEach(t=>{
+    const item = state.items.find(i=>i.id===t.itemId);
+    const returnQty = parseInt(document.getElementById('ret-'+t.itemId)?.value||0);
+    const returnClamped = Math.max(0, Math.min(returnQty, t.takenQty));
+    const soldQty = t.takenQty - returnClamped;
+
+    // Add returns back to inventory
+    if(returnClamped > 0 && item){
+      const before = itemQty(item);
+      addReturn(item, returnClamped, activeShift.id);
+      const after = itemQty(item);
+      writeLog('Shift Return', {
+        item:   t.itemName,
+        qty:    +returnClamped,
+        before,
+        after,
+        cost:   null,
+        refId:  activeShift.id,
+        by:     activeShift.staff,
+      });
+    }
+
+    // item already declared above — use it directly
+    const rev  = item ? revenueFromPacks(item, soldQty) : soldQty * (t.unitSell||0);
+    const cogs = item ? cogsFromPacks(item, soldQty) : (soldQty > 0 ? (t.totalCost * (soldQty / t.takenQty)) : 0);
+    const wasteQty = (activeShift.wastes||[]).filter(w=>w.itemId===t.itemId).reduce((s,w)=>s+w.qty,0);
+    const pcsLeft  = item ? pcsLeftFromPacks(item, t.takenQty, soldQty, wasteQty) : 0;
+    totalRevenue += rev;
+    totalCogs    += cogs;
+    returnsSummary.push({ itemName:t.itemName, takenQty:t.takenQty, returnQty:returnClamped, soldQty, rev, wasteQty, pcsLeft });
+  });
+
+  saveState();
+
+  const wasteCost = activeShift.wastes.reduce((s,w)=>s+(w.cost||0),0);
+  totalCogs += wasteCost;
+
+  const actualCash = parseFloat(document.getElementById('recon-actual')?.value||'');
+  const opening    = activeShift.openingCash || 0;
+  const shiftNotes = (document.getElementById('shift-end-notes')?.value||'').trim();
+
+  // Save completed shift
+  const completed = {
+    ...activeShift,
+    endedAt:    new Date().toISOString(),
+    returns:    returnsSummary,
+    revenue:    totalRevenue,
+    cogs:       totalCogs,
+    profit:     totalRevenue - totalCogs,
+    actualCash: isNaN(actualCash) ? null : actualCash,
+    openingCash: opening,
+    notes:      shiftNotes,
+  };
+  shiftHistory.unshift(completed);
+  saveShiftHistory();
+
+  writeLog('Shift Ended', {
+    item:   '',
+    qty:    null,
+    cost:   totalRevenue,
+    refId:  activeShift.id,
+    by:     activeShift.staff,
+    vendor: `Rev ₱${totalRevenue.toFixed(0)} · Sold ${returnsSummary.reduce((s,r)=>s+r.soldQty,0)} items`,
+  });
+
+  // Show summary modal BEFORE clearing activeShift
+  showShiftSummaryModal(completed, actualCash, opening);
+
+  // Clear active shift
+  activeShift = null;
+  try{ localStorage.removeItem(SHIFT_KEY); }catch(e){}
+  clearInterval(shiftTimerInterval);
+}
+
+function showShiftSummaryModal(sh, actualCash, opening){
+  const overlay = document.getElementById('shift-summary-overlay');
+  if(!overlay) return;
+
+  // Subtitle
+  const start = new Date(sh.startedAt);
+  const end   = new Date(sh.endedAt);
+  const dur   = Math.round((end-start)/60000);
+  const durStr = dur>=60 ? `${Math.floor(dur/60)}h ${dur%60}m` : `${dur}m`;
+  document.getElementById('ssb-subtitle').textContent =
+    `${sh.staff} · ${fmtTime(sh.startedAt)} → ${fmtTime(sh.endedAt)} · ${durStr}`;
+
+  // Stats
+  const totalSold = (sh.returns||[]).reduce((s,r)=>s+r.soldQty,0);
+  document.getElementById('ssb-stats').innerHTML = `
+    <div class="ssb-stat"><div class="ssb-stat-lbl">Revenue</div><div class="ssb-stat-val c-green">₱${(sh.revenue||0).toLocaleString('en-PH',{maximumFractionDigits:0})}</div></div>
+    <div class="ssb-stat"><div class="ssb-stat-lbl">Profit</div><div class="ssb-stat-val c-gold">₱${(sh.profit||0).toLocaleString('en-PH',{maximumFractionDigits:0})}</div></div>
+    <div class="ssb-stat"><div class="ssb-stat-lbl">Items Sold</div><div class="ssb-stat-val c-orange">${totalSold}</div></div>`;
+
+  // Breakdown table
+  document.getElementById('ssb-tbody').innerHTML = (sh.returns||[]).map(r=>`
+    <tr>
+      <td style="font-weight:600;color:var(--txt)">${r.itemName}</td>
+      <td style="text-align:center;color:var(--orange);font-family:'DM Mono',monospace;font-weight:700">${r.takenQty}</td>
+      <td style="text-align:center;color:var(--green);font-family:'DM Mono',monospace;font-weight:700">${r.soldQty}</td>
+      <td style="text-align:center;color:var(--blue);font-family:'DM Mono',monospace;font-weight:700">${r.returnQty}</td>
+      <td style="text-align:center;color:var(--red);font-family:'DM Mono',monospace;font-weight:700">${r.wasteQty||0}</td>
+      <td style="text-align:center;color:var(--txt2);font-family:'DM Mono',monospace;font-size:11px">${r.pcsLeft!=null?r.pcsLeft+' pcs':'—'}</td>
+      <td style="text-align:right;color:var(--gold);font-family:'DM Mono',monospace;font-size:12px">₱${(r.rev||0).toLocaleString('en-PH',{maximumFractionDigits:0})}</td>
+    </tr>`).join('') || `<tr><td colspan="7" style="text-align:center;color:var(--txt3);padding:12px">No items sold.</td></tr>`;
+
+  // Show shift notes in summary if present
+  const notesNoteEl = document.getElementById('ssb-shift-notes');
+  if(notesNoteEl){
+    if(sh.notes){ notesNoteEl.textContent = '📝 Notes: '+sh.notes; notesNoteEl.style.display='block'; }
+    else { notesNoteEl.style.display='none'; }
+  }
+
+  // Cash recon note
+  const reconEl = document.getElementById('ssb-recon-note');
+  if(!isNaN(actualCash) && actualCash !== null && actualCash !== ''){
+    const expected = opening + (sh.revenue||0);
+    const diff = actualCash - expected;
+    const sign = diff >= 0 ? '+' : '';
+    reconEl.innerHTML = `💵 Cash: Opening ₱${opening.toFixed(2)} + Revenue ₱${(sh.revenue||0).toFixed(2)} = Expected ₱${expected.toFixed(2)} · Collected ₱${actualCash.toFixed(2)} · <strong style="color:${Math.abs(diff)<0.01?'var(--blue)':diff>0?'var(--green)':'var(--red)'}">${sign}₱${diff.toFixed(2)}</strong>`;
+    reconEl.style.display = 'block';
+  } else {
+    reconEl.style.display = 'none';
+  }
+
+  overlay.classList.add('open');
+}
+
+function closeShiftSummary(){
+  document.getElementById('shift-summary-overlay').classList.remove('open');
+  renderShiftsPage();
+  renderDashboard();
+}
+
+// ═══════════════════════════════════════
+//  HISTORY RENDER
+// ═══════════════════════════════════════
+function renderHistory(){
+  const countEl = document.getElementById('hist-count-label');
+  const listEl  = document.getElementById('hist-list');
+  if(!listEl) return;
+
+  if(!shiftHistory.length){
+    countEl.textContent = '0 shifts recorded';
+    listEl.innerHTML = `<div class="page-ph"><span class="ph-ico">🕐</span><div class="ph-title">No shift history yet</div><div class="ph-sub">Complete a shift to see it here.</div></div>`;
+    return;
+  }
+
+  countEl.textContent = `${shiftHistory.length} completed shift${shiftHistory.length===1?'':'s'}`;
+
+  listEl.innerHTML = shiftHistory.map((sh, idx)=>{
+    const start = new Date(sh.startedAt);
+    const end   = sh.endedAt ? new Date(sh.endedAt) : null;
+    const dur   = end ? Math.round((end-start)/60000) : null;
+    const durStr = dur ? (dur>=60 ? `${Math.floor(dur/60)}h ${dur%60}m` : `${dur}m`) : '—';
+    const dateStr = start.toLocaleDateString('en-PH',{month:'short',day:'2-digit',year:'numeric'});
+    const totalOut = sh.outs.reduce((s,o)=>s+o.qty,0);
+    const totalWaste = sh.wastes.reduce((s,w)=>s+w.qty,0);
+    return `<div class="hist-card" onclick="toggleHistDetail(${idx})">
+      <div class="hist-card-top">
+        <div>
+          <div class="hist-card-staff">▶ ${sh.staff}</div>
+          <div class="hist-card-dt">${dateStr} · ${fmtTime(sh.startedAt)} → ${end?fmtTime(sh.endedAt):'?'} · ${durStr}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="hist-card-rev">₱${(sh.revenue||0).toLocaleString('en-PH',{minimumFractionDigits:0})}</div>
+          <div style="font-size:11px;color:var(--txt3)">profit ₱${(sh.profit||0).toLocaleString('en-PH',{minimumFractionDigits:0})}</div>
+        </div>
+      </div>
+      <div class="hist-card-chips">
+        <span class="hist-chip">${totalOut} items out</span>
+        ${totalWaste?`<span class="hist-chip" style="color:var(--red)">⚠ ${totalWaste} wasted</span>`:''}
+        <span class="hist-chip">COGS ₱${(sh.cogs||0).toFixed(0)}</span>
+        <span class="hist-chip">Ref: ${sh.id.slice(-6)}</span>
+      </div>
+      <div id="hist-detail-${idx}" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--bdr)">
+        ${(sh.returns||[]).map(r=>`<div style="display:flex;gap:8px;font-size:12px;padding:4px 0;border-bottom:1px solid var(--bdr);color:var(--txt2);flex-wrap:wrap">
+          <span style="flex:1;min-width:100px;color:var(--txt);font-weight:600">${r.itemName}</span>
+          <span>Out: <b style="color:var(--orange)">${r.takenQty}</b></span>
+          <span>Sold: <b style="color:var(--green)">${r.soldQty}</b></span>
+          <span>Returned: <b style="color:var(--blue)">${r.returnQty}</b></span>
+          ${r.wasteQty?`<span>Waste: <b style="color:var(--red)">${r.wasteQty}</b></span>`:''}
+          ${r.pcsLeft!=null?`<span>Left: <b style="color:var(--txt2)">${r.pcsLeft} pcs</b></span>`:''}
+        </div>`).join('')}
+        ${sh.notes?`<div style="font-size:12px;margin-top:8px;padding:8px 10px;background:var(--blue-l);border:1px solid var(--blue-b);border-radius:var(--rs);color:var(--blue)">📝 ${sh.notes}</div>`:''}
+        ${!(sh.returns||[]).length?'<div style="font-size:12px;color:var(--txt3)">No returns recorded.</div>':''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleHistDetail(idx){
+  const el = document.getElementById('hist-detail-'+idx);
+  if(el) el.style.display = el.style.display==='none'?'block':'none';
+}
+
+// ═══════════════════════════════════════
+//  REPORTS RENDER
+// ═══════════════════════════════════════
+let trendPeriod = 'weekly';
+
+function setTrendPeriod(p){
+  trendPeriod = p;
+  document.getElementById('trend-btn-weekly').classList.toggle('active',  p==='weekly');
+  document.getElementById('trend-btn-monthly').classList.toggle('active', p==='monthly');
+  renderTrendChart();
+}
+
+function renderTrendChart(){
+  const el = document.getElementById('rpt-trend-chart');
+  if(!el) return;
+
+  // Build buckets from shiftHistory
+  const buckets = {}; // key → {label, rev, profit}
+  shiftHistory.forEach(sh=>{
+    const d = new Date(sh.startedAt);
+    let key, label;
+    if(trendPeriod === 'weekly'){
+      // ISO week: Mon-Sun
+      const day = d.getDay(); // 0=Sun
+      const diff = (day===0 ? -6 : 1) - day;
+      const mon = new Date(d); mon.setDate(d.getDate()+diff); mon.setHours(0,0,0,0);
+      key   = mon.toISOString().slice(0,10);
+      label = mon.toLocaleDateString('en-PH',{month:'short',day:'2-digit'});
+    } else {
+      key   = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+      label = d.toLocaleDateString('en-PH',{month:'short',year:'numeric'});
+    }
+    if(!buckets[key]) buckets[key] = {label, rev:0, profit:0};
+    buckets[key].rev    += sh.revenue||0;
+    buckets[key].profit += sh.profit||0;
+  });
+
+  const keys   = Object.keys(buckets).sort();
+  const last   = trendPeriod==='weekly' ? 8 : 6;
+  const slice  = keys.slice(-last);
+
+  if(!slice.length){
+    el.innerHTML = '<div style="font-size:13px;color:var(--txt3);padding:16px 0;text-align:center">No shift data yet — complete a shift to see the trend.</div>';
+    return;
+  }
+
+  const maxRev = Math.max(...slice.map(k=>buckets[k].rev), 1);
+  const W = 80, GAP = 12, PAD = 36, H = 140, LABEL_H = 28;
+  const totalW = Math.max(slice.length * (W+GAP) + PAD*2, 400);
+
+  let bars = '', labels = '', profits = '';
+  slice.forEach((k,i)=>{
+    const b   = buckets[k];
+    const x   = PAD + i*(W+GAP);
+    const barH = Math.max(4, Math.round((b.rev/maxRev)*(H-10)));
+    const barY = H - barH;
+    const cx   = x + W/2;
+
+    // revenue bar
+    bars += `<rect x="${x}" y="${barY}" width="${W}" height="${barH}"
+      rx="4" fill="var(--green)" opacity=".85">
+      <title>Revenue: ₱${b.rev.toLocaleString('en-PH',{maximumFractionDigits:0})}</title></rect>`;
+
+    // profit line dot (profit may be negative — clamp to 0 for display)
+    const profitH = Math.max(0, Math.round((b.profit/maxRev)*(H-10)));
+    const profitY = H - profitH;
+    profits += `<circle cx="${cx}" cy="${profitY}" r="4" fill="var(--gold)">
+      <title>Profit: ₱${b.profit.toLocaleString('en-PH',{maximumFractionDigits:0})}</title></circle>`;
+    if(i>0){
+      const prevK = slice[i-1];
+      const prevH = Math.max(0, Math.round((buckets[prevK].profit/maxRev)*(H-10)));
+      const prevY = H - prevH;
+      const prevCx = PAD + (i-1)*(W+GAP) + W/2;
+      profits = `<line x1="${prevCx}" y1="${prevY}" x2="${cx}" y2="${profitY}"
+        stroke="var(--gold)" stroke-width="2" stroke-dasharray="4 2" opacity=".8"/>` + profits;
+    }
+
+    // value label above bar
+    bars += `<text x="${cx}" y="${barY-4}" text-anchor="middle" font-size="10"
+      fill="var(--txt2)" font-family="DM Mono,monospace">₱${b.rev>=1000?(b.rev/1000).toFixed(1)+'k':b.rev.toFixed(0)}</text>`;
+
+    // x-axis label
+    labels += `<text x="${cx}" y="${H+LABEL_H-8}" text-anchor="middle" font-size="10"
+      fill="var(--txt3)" font-family="DM Sans,sans-serif">${b.label}</text>`;
+  });
+
+  // Legend
+  const legend = `<div style="display:flex;gap:16px;margin-bottom:8px;font-size:11px;color:var(--txt3)">
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:var(--green);border-radius:2px;opacity:.85;flex-shrink:0"></span>Revenue</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:3px;background:var(--gold);flex-shrink:0"></span>Profit</span>
+  </div>`;
+
+  el.innerHTML = legend + `<svg viewBox="0 0 ${totalW} ${H+LABEL_H}" width="${totalW}" height="${H+LABEL_H}" style="min-width:${totalW}px;display:block">
+    ${bars}${profits}${labels}
+  </svg>`;
+}
+
+function renderReports(){
+  const statsEl     = document.getElementById('rpt-stats');
+  const topItemsEl  = document.getElementById('rpt-top-items');
+  const shiftRevEl  = document.getElementById('rpt-shift-rev');
+  if(!statsEl) return;
+
+  const totalRev    = shiftHistory.reduce((s,sh)=>s+(sh.revenue||0),0);
+  const totalCogs   = shiftHistory.reduce((s,sh)=>s+(sh.cogs||0),0);
+  const totalProfit = totalRev - totalCogs;
+  const totalShifts = shiftHistory.length;
+
+  statsEl.innerHTML = `
+    <div class="stat-card"><div class="stat-lbl">💰 Total Revenue</div><div class="stat-val c-green">₱${totalRev.toLocaleString('en-PH',{maximumFractionDigits:0})}</div></div>
+    <div class="stat-card"><div class="stat-lbl">📈 Total Profit</div><div class="stat-val c-gold">₱${totalProfit.toLocaleString('en-PH',{maximumFractionDigits:0})}</div></div>
+    <div class="stat-card"><div class="stat-lbl">🏁 Total Shifts</div><div class="stat-val c-orange">${totalShifts}</div></div>`;
+
+  renderTrendChart();
+
+  // Top items by sold qty
+  const soldMap = {};
+  shiftHistory.forEach(sh=>{
+    (sh.returns||[]).forEach(r=>{
+      if(!soldMap[r.itemName]) soldMap[r.itemName] = 0;
+      soldMap[r.itemName] += r.soldQty;
+    });
+  });
+  const sorted = Object.entries(soldMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const maxSold = sorted[0]?.[1]||1;
+
+  topItemsEl.innerHTML = sorted.length ? sorted.map(([name,qty])=>`
+    <div class="rpt-item-row">
+      <div class="rpt-item-name">${name}</div>
+      <div class="rpt-bar-wrap"><div class="rpt-bar" style="width:${(qty/maxSold*100).toFixed(1)}%"></div></div>
+      <div class="rpt-item-val c-orange">${qty} sold</div>
+    </div>`)
+    .join('') : '<div style="font-size:13px;color:var(--txt3);padding:8px 0">No sales data yet.</div>';
+
+  // Revenue per shift
+  const last10 = shiftHistory.slice(0,10).reverse();
+  const maxRev = Math.max(...last10.map(s=>s.revenue||0), 1);
+  shiftRevEl.innerHTML = last10.length ? last10.map(sh=>`
+    <div class="rpt-item-row">
+      <div class="rpt-item-name" style="font-size:12px;color:var(--txt2)">${sh.staff} · ${new Date(sh.startedAt).toLocaleDateString('en-PH',{month:'short',day:'2-digit'})}</div>
+      <div class="rpt-bar-wrap"><div class="rpt-bar" style="width:${((sh.revenue||0)/maxRev*100).toFixed(1)}%;background:var(--green)"></div></div>
+      <div class="rpt-item-val c-green">₱${(sh.revenue||0).toLocaleString('en-PH',{maximumFractionDigits:0})}</div>
+    </div>`)
+    .join('') : '<div style="font-size:13px;color:var(--txt3);padding:8px 0">No shifts recorded yet.</div>';
+}
+
+function itemQty(item){ return item.batches.reduce((s,b)=>s+b.qty,0); }
+
+// ── Cost/pricing helpers ──────────────────────────────────────
+function costPerPiece(item){
+  const ppp = item.pcsPerPack || 1;
+  return (item.costPerPack || 0) / ppp;
+}
+function costPerOrder(item){
+  return costPerPiece(item) * (item.pcsPerOrder || 1);
+}
+function sellPerOrder(item){ return item.sellPrice || 0; }
+function profitPerOrder(item){ return sellPerOrder(item) - costPerOrder(item); }
+function marginPct(item){
+  const sell = sellPerOrder(item);
+  if(!sell) return null;
+  return ((profitPerOrder(item) / sell) * 100);
+}
+function packsToOrders(item, packs){
+  const pcsPerPack = item.pcsPerPack || 1;
+  const pcsPerOrder = item.pcsPerOrder || 1;
+  if(!pcsPerOrder) return packs;
+  return Math.floor((packs * pcsPerPack) / pcsPerOrder);
+}
+function revenueFromPacks(item, packsSold){
+  return packsToOrders(item, packsSold) * sellPerOrder(item);
+}
+function cogsFromPacks(item, packsSold){
+  return packsSold * (item.costPerPack || 0);
+}
+function pcsLeftFromPacks(item, packsTaken, packsSold, packsWasted){
+  const ppp = item.pcsPerPack || 1;
+  const takenPcs = packsTaken * ppp;
+  const soldOrders = packsToOrders(item, packsSold);
+  const soldPcs = soldOrders * (item.pcsPerOrder || 1);
+  const wastedPcs = packsWasted * ppp;
+  return Math.max(0, takenPcs - soldPcs - wastedPcs);
+}
+
+function colorVar(c){ return `var(--${c==='txt2'?'txt2':c})`; }
+function dotStyle(c){
+  const map={orange:'var(--orange)',blue:'var(--blue)',green:'var(--green)',
+             purple:'var(--purple)',red:'var(--red)',gold:'var(--gold)',txt2:'var(--txt2)'};
+  return `background:${map[c]||'var(--txt3)'}`;
+}
+
+// ═══════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════
+const pageMeta = {
+  alerts:     {title:'Stock Alerts',       sub:'Out of stock · Low stock · Restock thresholds',badge:'Live',      btn:false},
+  dashboard:  {title:'Dashboard',        sub:'CartShift Inventory Pro',                      badge:null,        btn:false},
+  inventory:  {title:'Master Inventory', sub:'Stock levels with FIFO batches',               badge:'FIFO',      btn:true},
+  deliveries: {title:'Vendor Deliveries',sub:'Track all incoming stock',                    badge:null,        btn:false, delBtn:true},
+  shifts:     {title:'Shifts',           sub:'Start, manage, and end shifts',               badge:null,        btn:false},
+  ledger:     {title:'Audit Ledger',     sub:'Complete audit trail — immutable, read-only', badge:'Audit Log', btn:false, printBtn:true, csvBtn:true},
+  reports:    {title:'Reports',          sub:'Sales & profit analytics across all shifts',  badge:null,        btn:false},
+  history:    {title:'Shift History',    sub:'All completed shifts',                        badge:null,        btn:false},
+  settings:   {title:'Settings',         sub:'Configuration & setup',                       badge:null,        btn:false},
+};
+
+let currentPage = 'dashboard';
+
+function showPage(id, navEl){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg = document.getElementById('page-'+id);
+  if(pg) pg.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(navEl) navEl.classList.add('active');
+  const m = pageMeta[id]||{};
+  document.getElementById('topbar-title').textContent = m.title||id;
+  document.getElementById('topbar-sub').textContent   = m.sub||'';
+  const right = document.getElementById('topbar-right');
+  right.innerHTML = '';
+  if(m.badge)    right.innerHTML += `<span class="topbar-badge">${m.badge}</span>`;
+  if(m.btn)      right.innerHTML += `<button class="btn-add" onclick="openAddModal()">＋ Add Item</button>`;
+  if(m.delBtn)   right.innerHTML += `<button class="btn-add" onclick="showDeliveryForm()">＋ New Delivery</button>`;
+  if(m.printBtn) right.innerHTML += `<button class="btn-print" onclick="printLedger()">🖨 Print / Save PDF</button>`;
+  if(m.csvBtn)   right.innerHTML += `<button class="btn-csv" onclick="exportLedgerCSV()">⬇ Download CSV</button>`;
+  currentPage = id;
+  if(id==='alerts')    renderAlertsPage();
+  if(id==='dashboard') renderDashboard();
+  if(id==='inventory') renderInventory();
+  if(id==='deliveries') renderDeliveries();
+  if(id==='ledger')    renderLedger();
+  if(id==='shifts')    renderShiftsPage();
+  if(id==='history')   renderHistory();
+  if(id==='reports')   renderReports();
+}
+
+// ═══════════════════════════════════════
+//  ALERT HELPERS (shared by dashboard + alerts page)
+// ═══════════════════════════════════════
+
+// Returns {isOut, isLow, pct} given item and its current qty
+function stockStatus(item){
+  const qty = itemQty(item);
+  const target = item.restockTarget || item.threshold || 0;
+  const warnPct = (item.restockPct != null ? item.restockPct : 20) / 100;
+  const warnLevel = Math.ceil(target * warnPct);
+  // Prefer threshold-based for backward compat; if restockTarget set, use that
+  const lowLevel = item.restockTarget ? warnLevel : item.threshold;
+  const isOut = qty === 0;
+  const isLow = !isOut && qty <= lowLevel;
+  const pct = target > 0 ? Math.min(100, Math.round((qty / target) * 100)) : (isOut ? 0 : 100);
+  return { qty, isOut, isLow, pct, target, lowLevel };
+}
+
+function buildStockAlertRows(items, type){
+  return items.map(i=>{
+    const { qty, pct, target } = stockStatus(i);
+    const isOut = type === 'oos';
+    const barColor = isOut ? 'var(--red)' : 'var(--gold)';
+    const badgeClass = isOut ? 'oos' : 'low';
+    const badgeLabel = isOut ? '0 ' + i.unit : qty + ' ' + i.unit;
+    const metaText = target > 0 ? `Target: ${target} · ${pct}% left` : `Threshold: ${i.threshold} ${i.unit}`;
+    return `<div class="sar-item">
+      <div class="sar-dot" style="${dotStyle(i.color)}"></div>
+      <div class="sar-name">${i.name}</div>
+      <div class="sar-meta">${metaText}</div>
+      ${target > 0 ? `<div class="sar-bar-wrap">
+        <div class="sar-bar-bg"><div class="sar-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+      </div>` : ''}
+      <div class="sar-badge ${badgeClass}">${badgeLabel}</div>
+    </div>`;
+  }).join('');
+}
+
+function buildStockAlertSection(items, type, title){
+  if(!items.length) return '';
+  const cls = type === 'oos' ? 'oos' : 'low';
+  const icon = type === 'oos' ? '⊗' : '⚠';
+  return `<div class="stock-alert-section">
+    <div class="stock-alert-header ${cls}">
+      <span class="sah-icon">${icon}</span>
+      <span class="sah-title ${cls}">${title}</span>
+      <span class="sah-count ${cls}">${items.length}</span>
+    </div>
+    <div class="stock-alert-rows">${buildStockAlertRows(items, type)}</div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+//  DASHBOARD RENDER
+// ═══════════════════════════════════════
+function renderDashboard(){
+  const items = state.items;
+  // Use itemQty for FIFO-correct quantity — this is the fix
+  const outItems = items.filter(i => itemQty(i) === 0);
+  const lowItems = items.filter(i => { const s = stockStatus(i); return !s.isOut && s.isLow; });
+  const totalStock = items.reduce((s,i) => s + itemQty(i), 0);
+
+  // Update nav badge
+  updateAlertNavBadge(outItems.length, lowItems.length);
+
+  // Shift banner
+  const bannerSub = document.getElementById('dash-shift-sub');
+  const bannerSide = document.querySelector('.banner-side');
+  if(activeShift){
+    bannerSub.textContent = `Shift started by ${activeShift.staff} · ${fmtTime(activeShift.startedAt)}`;
+    if(bannerSide) bannerSide.textContent = activeShift.staff;
+  } else {
+    bannerSub.textContent = 'No active shift · Go to Shifts to begin';
+    if(bannerSide) bannerSide.textContent = 'Staff';
+  }
+
+  // Revenue/profit/cogs from completed shifts
+  const allRev  = shiftHistory.reduce((s,sh) => s + (sh.revenue||0), 0);
+  const allCogs = shiftHistory.reduce((s,sh) => s + (sh.cogs||0), 0);
+  const allProfit = allRev - allCogs;
+
+  // Out of stock alert on dashboard — rich cards
+  const oos = document.getElementById('dash-out-of-stock');
+  if(oos) oos.innerHTML = buildStockAlertSection(outItems, 'oos', 'Out of Stock — Needs Immediate Restock');
+
+  // Expiry alerts
+  const _today = new Date(); _today.setHours(0,0,0,0);
+  const _in3 = new Date(_today); _in3.setDate(_in3.getDate()+3);
+  const expiryEl = document.getElementById('dash-expiry-alert');
+  if(expiryEl){
+    const expired = [], soonExp = [];
+    state.items.forEach(item=>{
+      item.batches.forEach(b=>{
+        if(!b.expiryDate) return;
+        const exp = new Date(b.expiryDate); exp.setHours(0,0,0,0);
+        const entry = {name:item.name, qty:b.qty, unit:item.unit, exp:b.expiryDate};
+        if(exp < _today)   expired.push(entry);
+        else if(exp<=_in3) soonExp.push(entry);
+      });
+    });
+    let html = '';
+    if(expired.length){
+      html += `<div class="alert-card" style="margin-bottom:10px">
+        <div class="alert-hdr"><span class="alert-hdr-ico">⚠️</span><span class="alert-hdr-title">Expired Stock — Do Not Sell</span></div>
+        <ul class="alert-list">${expired.map(b=>`<li>${b.name} — ${b.qty} ${b.unit} · Expired ${b.exp}</li>`).join('')}</ul>
+      </div>`;
+    }
+    if(soonExp.length){
+      html += `<div style="background:var(--gold-l);border:1px solid var(--gold-b);border-radius:var(--r);padding:15px 18px;margin-bottom:10px">
+        <div class="alert-hdr"><span class="alert-hdr-ico">⏰</span><span class="alert-hdr-title" style="color:var(--gold)">Expiring Within 3 Days — Sell First</span></div>
+        <ul class="alert-list">${soonExp.map(b=>`<li style="color:var(--gold);opacity:.85">${b.name} — ${b.qty} ${b.unit} · Expires ${b.exp}</li>`).join('')}</ul>
+      </div>`;
+    }
+    expiryEl.innerHTML = html;
+  }
+
+  // Stats
+  document.getElementById('dash-total-stock').textContent = totalStock;
+  document.getElementById('dash-revenue').textContent = '₱'+allRev.toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:0});
+  document.getElementById('dash-profit').textContent  = '₱'+allProfit.toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:0});
+  document.getElementById('dash-cogs').textContent    = '₱'+allCogs.toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:0});
+
+  // Low stock list
+  const lowEl = document.getElementById('dash-low-stock');
+  if(lowItems.length===0 && outItems.length===0){
+    lowEl.innerHTML = `<div class="low-item"><div class="low-info"><div class="low-name" style="color:var(--green)">✓ All items stocked</div><div class="low-sub">No low stock alerts right now</div></div></div>`;
+  } else {
+    const show = [...lowItems];
+    lowEl.innerHTML = show.map(i=>{
+      const { qty, pct, target } = stockStatus(i);
+      return `<div class="low-item">
+        <div class="low-dot" style="${dotStyle(i.color)}"></div>
+        <div class="low-info">
+          <div class="low-name">${i.name}</div>
+          <div class="low-sub">${target > 0 ? pct+'% of target ('+target+' '+i.unit+')' : 'Threshold: '+i.threshold+' '+i.unit}</div>
+        </div>
+        <div class="low-badge gold">${qty}</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ═══════════════════════════════════════
+//  NAV BADGE UPDATE
+// ═══════════════════════════════════════
+function updateAlertNavBadge(oosCount, lowCount){
+  const badge = document.getElementById('alerts-nav-badge');
+  if(!badge) return;
+  const total = oosCount + lowCount;
+  if(total > 0){
+    badge.textContent = total;
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════════
+//  ALERTS PAGE RENDER
+// ═══════════════════════════════════════
+function renderAlertsPage(){
+  const items = state.items;
+  const outItems = items.filter(i => itemQty(i) === 0);
+  const lowItems = items.filter(i => { const s = stockStatus(i); return !s.isOut && s.isLow; });
+  const okItems  = items.filter(i => { const s = stockStatus(i); return !s.isOut && !s.isLow; });
+
+  updateAlertNavBadge(outItems.length, lowItems.length);
+
+  // Summary chips
+  const chipsEl = document.getElementById('alerts-summary-chips');
+  if(chipsEl){
+    chipsEl.innerHTML = `
+      ${outItems.length ? `<div class="asc-chip oos">⊗ ${outItems.length} Out of Stock</div>` : ''}
+      ${lowItems.length ? `<div class="asc-chip low">⚠ ${lowItems.length} Low Stock</div>` : ''}
+      <div class="asc-chip ok">✓ ${okItems.length} Stocked</div>
+    `;
+  }
+
+  // OOS section
+  const oosEl = document.getElementById('alerts-oos-section');
+  if(oosEl) oosEl.innerHTML = buildStockAlertSection(outItems, 'oos', 'Out of Stock — Needs Immediate Restock');
+
+  // Low section
+  const lowEl = document.getElementById('alerts-low-section');
+  if(lowEl) lowEl.innerHTML = buildStockAlertSection(lowItems, 'low', 'Low Stock — Restock Soon');
+
+  // OK section (collapsed summary)
+  const okEl = document.getElementById('alerts-ok-section');
+  if(okEl && okItems.length){
+    okEl.innerHTML = `<div style="margin-bottom:14px">
+      <div class="stock-alert-header ok" style="background:var(--green-l);border:1px solid var(--green-b);border-radius:var(--r)">
+        <span class="sah-icon">✓</span>
+        <span class="sah-title" style="color:var(--green)">Stocked — All good</span>
+        <span class="sah-count" style="background:var(--green-l);border:1px solid var(--green-b);color:var(--green)">${okItems.length}</span>
+      </div>
+    </div>`;
+  }
+
+  // Restock threshold list
+  const rstEl = document.getElementById('alerts-rst-list');
+  if(rstEl){
+    rstEl.innerHTML = items.map(item => {
+      const { qty } = stockStatus(item);
+      const target = item.restockTarget || item.threshold || 0;
+      const pct = item.restockPct != null ? item.restockPct : 20;
+      const warnLevel = Math.ceil(target * (pct/100));
+      const isOut = qty === 0;
+      const isLow = !isOut && qty <= warnLevel;
+      const qtyColor = isOut ? 'var(--red)' : isLow ? 'var(--gold)' : 'var(--green)';
+      return `<div class="rst-item${isOut?' sar-item-oos':isLow?' sar-item-low':''}">
+        <div class="rst-dot" style="${dotStyle(item.color)}"></div>
+        <div class="rst-name">${item.name}
+          <div style="font-size:11px;color:${qtyColor};font-weight:700;margin-top:2px">
+            ${isOut ? 'OUT OF STOCK' : isLow ? 'LOW — '+qty+' '+item.unit+' left' : qty+' '+item.unit+' · OK'}
+          </div>
+        </div>
+        <div class="rst-target-wrap">
+          <div class="rst-target-label">Target Qty</div>
+          <div class="rst-target-row">
+            <input class="rst-input" id="rst-target-${item.id}" type="number" min="0" value="${target}"
+              onchange="saveRestockSettings('${item.id}')">
+            <span style="font-size:11px;color:var(--txt3)">${item.unit}</span>
+          </div>
+        </div>
+        <div class="rst-pct-wrap">
+          <div class="rst-pct-label">Warn %</div>
+          <div class="rst-pct-row">
+            <input class="rst-pct-input" id="rst-pct-${item.id}" type="number" min="1" max="100" value="${pct}"
+              onchange="saveRestockSettings('${item.id}')">
+            <span style="font-size:11px;color:var(--txt3)">%</span>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--txt3);text-align:right;min-width:64px">Warn at<br><b style="color:var(--orange);font-size:13px">${warnLevel}</b> ${item.unit}</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function saveRestockSettings(itemId){
+  const item = state.items.find(i=>i.id===itemId);
+  if(!item) return;
+  const targetEl = document.getElementById('rst-target-'+itemId);
+  const pctEl    = document.getElementById('rst-pct-'+itemId);
+  if(targetEl) item.restockTarget = Math.max(0, parseInt(targetEl.value)||0);
+  if(pctEl)    item.restockPct    = Math.max(1, Math.min(100, parseInt(pctEl.value)||20));
+  // Also update legacy threshold to match for backward compat
+  if(item.restockTarget) item.threshold = Math.ceil(item.restockTarget * (item.restockPct/100));
+  saveState();
+  renderAlertsPage();
+}
+
+function fmtTime(isoStr){
+  const d = new Date(isoStr);
+  const h = d.getHours()%12||12;
+  const m = String(d.getMinutes()).padStart(2,'0');
+  return `${h}:${m} ${d.getHours()<12?'AM':'PM'}`;
+}
+
+// ═══════════════════════════════════════
+//  INVENTORY RENDER
+// ═══════════════════════════════════════
+let activeFilter = 'All';
+
+function setFilter(f, el){
+  activeFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderInventory();
+}
+
+function renderInventory(){
+  const items = state.items;
+  const outItems = items.filter(i=>itemQty(i)===0);
+
+  // out of stock alert — rich card
+  const alertEl = document.getElementById('inv-out-alert');
+  if(outItems.length){
+    alertEl.innerHTML = buildStockAlertSection(outItems, 'oos', 'Out of Stock') + '<div style="height:4px"></div>';
+  } else {
+    alertEl.innerHTML = '';
+  }
+
+  // filter items
+  const filtered = activeFilter==='All' ? items : items.filter(i=>i.category===activeFilter);
+
+  const listEl = document.getElementById('inv-list');
+  if(filtered.length===0){
+    listEl.innerHTML = `<div class="page-ph" style="margin-top:10px"><span class="ph-ico">📦</span><div class="ph-title">No items in "${activeFilter}"</div><div class="ph-sub">Add items using the + Add Item button above.</div></div>`;
+    return;
+  }
+
+  listEl.innerHTML = filtered.map(item=>{
+    const qty = itemQty(item);
+    const isOut = qty===0;
+    const isLow = qty>0 && qty<=item.threshold;
+    const qtyClass = isOut?'out':isLow?'low':'ok';
+    const cardClass = isOut?'out':isLow?'low-stock':'';
+    const badge = isOut ? `<span class="inv-out-badge">OUT</span>` : isLow ? `<span class="inv-low-badge">LOW</span>` : '';
+
+    const todayD = new Date(); todayD.setHours(0,0,0,0);
+    const in3D = new Date(todayD); in3D.setDate(in3D.getDate()+3);
+    const batchesHtml = item.batches.length
+      ? item.batches.map((b,bi)=>{
+          let expiryTag = '';
+          if(b.expiryDate){
+            const exp = new Date(b.expiryDate); exp.setHours(0,0,0,0);
+            if(exp < todayD)
+              expiryTag = `<span style="font-size:10px;font-weight:700;color:var(--red);background:var(--red-l);border:1px solid var(--red-b);border-radius:999px;padding:2px 8px;white-space:nowrap">EXPIRED ${b.expiryDate}</span>`;
+            else if(exp <= in3D)
+              expiryTag = `<span style="font-size:10px;font-weight:700;color:var(--gold);background:var(--gold-l);border:1px solid var(--gold-b);border-radius:999px;padding:2px 8px;white-space:nowrap">EXP ${b.expiryDate}</span>`;
+            else
+              expiryTag = `<span style="font-size:10px;color:var(--txt3);background:var(--bg4);border:1px solid var(--bdr);border-radius:999px;padding:2px 8px;white-space:nowrap">EXP ${b.expiryDate}</span>`;
+          }
+          return `
+          <div class="batch-row-item">
+            <span class="batch-row-date">${b.date||'—'}</span>
+            <span class="batch-row-qty">${b.qty} ${item.unit}</span>
+            <span class="batch-row-cost">₱${b.unitCost} ea</span>
+            ${expiryTag}
+            <button class="batch-del" onclick="deleteBatch('${item.id}',${bi},event)">✕</button>
+          </div>`;
+        }).join('')
+      : `<div style="font-size:12px;color:var(--txt3);padding:6px 0">No batches — click "+ Add Batch" to add stock</div>`;
+
+    const cpp = (item.costPerPack||0) / (item.pcsPerPack||1);
+    const cpo = cpp * (item.pcsPerOrder||1);
+    const profitPerOrd = (item.sellPrice||0) - cpo;
+    const profitColor = profitPerOrd >= 0 ? 'var(--green)' : 'var(--red)';
+
+    return `<div class="inv-item ${cardClass}" id="icard-${item.id}" onclick="toggleExpand('${item.id}')">
+      <div class="inv-top">
+        <div class="inv-dot" style="${dotStyle(item.color)}"></div>
+        <div class="inv-name">${item.name}${badge}</div>
+        <div style="display:flex;align-items:baseline;gap:4px">
+          <span class="inv-qty ${qtyClass}">${qty}</span>
+          <span class="inv-unit">${item.unit}</span>
+        </div>
+      </div>
+      <div class="inv-meta">
+        <span class="inv-meta-pill">Sell/order: ₱${item.sellPrice}</span>
+        <span class="inv-meta-pill">Pack cost: ₱${item.costPerPack}</span>
+        <span class="inv-meta-pill">${item.pcsPerPack||1}pcs/pack · ${item.pcsPerOrder||1}pcs/order</span>
+        <span class="inv-meta-pill" style="color:${profitColor}">Profit/order: ₱${profitPerOrd.toFixed(2)}</span>
+        <span class="inv-meta-pill">${item.category}</span>
+      </div>
+      <div class="inv-expand" id="expand-${item.id}" onclick="event.stopPropagation()">
+
+        <!-- ── EDIT PRICING SETTINGS ── -->
+        <div style="font-size:11px;color:var(--orange);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;font-weight:700">✏️ Edit Pricing & Settings</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px">
+          <div class="batch-field">
+            <div class="batch-lbl">Pack Cost (₱)</div>
+            <input class="batch-input" id="edit-cost-${item.id}" type="number" min="0" step="0.01" value="${item.costPerPack||0}" oninput="previewEditCalc('${item.id}')">
+          </div>
+          <div class="batch-field">
+            <div class="batch-lbl">Pcs Per Pack</div>
+            <input class="batch-input" id="edit-ppp-${item.id}" type="number" min="1" value="${item.pcsPerPack||1}" oninput="previewEditCalc('${item.id}')">
+          </div>
+          <div class="batch-field">
+            <div class="batch-lbl">Pcs Per Order</div>
+            <input class="batch-input" id="edit-ppo-${item.id}" type="number" min="1" value="${item.pcsPerOrder||1}" oninput="previewEditCalc('${item.id}')">
+          </div>
+          <div class="batch-field">
+            <div class="batch-lbl">Sell Price/Order (₱)</div>
+            <input class="batch-input" id="edit-sell-${item.id}" type="number" min="0" step="0.01" value="${item.sellPrice||0}" oninput="previewEditCalc('${item.id}')">
+          </div>
+        </div>
+        <div id="edit-calc-${item.id}" style="font-size:12px;color:var(--txt2);background:var(--bg4);border:1px solid var(--bdr);border-radius:var(--rs);padding:7px 10px;margin-bottom:8px">
+          Cost/pc: ₱${cpp.toFixed(2)} &nbsp;·&nbsp; Cost/order: ₱${cpo.toFixed(2)} &nbsp;·&nbsp; <span style="color:${profitColor};font-weight:700">Profit/order: ₱${profitPerOrd.toFixed(2)}</span>
+        </div>
+        <button class="btn-batch" style="background:var(--orange-l);border-color:var(--orange-b);color:var(--orange);margin-bottom:16px" onclick="saveItemSettings('${item.id}')">💾 Save Settings</button>
+
+        <!-- ── ADD BATCH ── -->
+        <div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;font-weight:600">Add Stock Batch</div>
+        <div class="batch-form">
+          <div class="batch-field"><div class="batch-lbl">Qty (packs)</div><input class="batch-input" id="bqty-${item.id}" type="number" min="0" placeholder="0"></div>
+          <div class="batch-field"><div class="batch-lbl">Cost ₱/pack</div><input class="batch-input" id="bcost-${item.id}" type="number" min="0" placeholder="0" step="0.01"></div>
+          <div class="batch-field"><div class="batch-lbl">Date Received</div><input class="batch-input" id="bdate-${item.id}" type="date" value="${todayStr()}"></div>
+          <button class="btn-batch" onclick="addBatch('${item.id}')">+ Add</button>
+        </div>
+        <div class="batch-field" style="margin-bottom:12px">
+          <div class="batch-lbl">Expiry Date &nbsp;<span style="color:var(--txt3);font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">(optional — for food safety)</span></div>
+          <input class="batch-input" id="bexpiry-${item.id}" type="date" style="max-width:180px">
+        </div>
+        <div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;font-weight:600">Batches on hand</div>
+        <div class="batches-list">${batchesHtml}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleExpand(id){
+  const card = document.getElementById('icard-'+id);
+  const isExp = card.classList.contains('expanded');
+  // collapse all
+  document.querySelectorAll('.inv-item').forEach(c=>c.classList.remove('expanded'));
+  if(!isExp) card.classList.add('expanded');
+}
+
+function previewEditCalc(itemId){
+  const cost = parseFloat(document.getElementById('edit-cost-'+itemId)?.value||0);
+  const ppp  = parseInt(document.getElementById('edit-ppp-'+itemId)?.value||1)||1;
+  const ppo  = parseInt(document.getElementById('edit-ppo-'+itemId)?.value||1)||1;
+  const sell = parseFloat(document.getElementById('edit-sell-'+itemId)?.value||0);
+  const cpp  = cost / ppp;
+  const cpo  = cpp * ppo;
+  const profit = sell - cpo;
+  const color  = profit >= 0 ? 'var(--green)' : 'var(--red)';
+  const el = document.getElementById('edit-calc-'+itemId);
+  if(el) el.innerHTML = `Cost/pc: ₱${cpp.toFixed(2)} &nbsp;·&nbsp; Cost/order: ₱${cpo.toFixed(2)} &nbsp;·&nbsp; <span style="color:${color};font-weight:700">Profit/order: ₱${profit.toFixed(2)}</span>`;
+}
+
+function saveItemSettings(itemId){
+  const item = state.items.find(i=>i.id===itemId);
+  if(!item) return;
+  const cost = parseFloat(document.getElementById('edit-cost-'+itemId)?.value||0);
+  const ppp  = parseInt(document.getElementById('edit-ppp-'+itemId)?.value||1)||1;
+  const ppo  = parseInt(document.getElementById('edit-ppo-'+itemId)?.value||1)||1;
+  const sell = parseFloat(document.getElementById('edit-sell-'+itemId)?.value||0);
+  item.costPerPack  = cost;
+  item.pcsPerPack   = ppp;
+  item.pcsPerOrder  = ppo;
+  item.sellPrice    = sell;
+  saveState();
+  writeLog('Adjustment', {item:item.name, by:isSessionActive()?'Manager':'Staff', vendor:'Settings updated'});
+  renderInventory();
+  // Re-expand after re-render
+  const card = document.getElementById('icard-'+itemId);
+  if(card) card.classList.add('expanded');
+}
+
+function addBatch(itemId){
+  const item = state.items.find(i=>i.id===itemId);
+  if(!item) return;
+  const qty = parseInt(document.getElementById('bqty-'+itemId)?.value||0);
+  const cost = parseFloat(document.getElementById('bcost-'+itemId)?.value||0);
+  const date = document.getElementById('bdate-'+itemId)?.value||todayStr();
+  if(!qty||qty<=0){alert('Please enter a valid quantity.');return;}
+  const expiryDate = document.getElementById('bexpiry-'+itemId)?.value || '';
+  const before = itemQty(item);
+  item.batches.push({qty, unitCost:cost, date, ...(expiryDate ? {expiryDate} : {})});
+  const after = itemQty(item);
+  saveState();
+  writeLog('Batch Added', {item:item.name, qty:+qty, before, after, cost:cost*qty, by:isSessionActive()?'Manager':'Staff'});
+  renderInventory();
+  // re-expand the same card after re-render
+  const card = document.getElementById('icard-'+itemId);
+  if(card) card.classList.add('expanded');
+}
+
+function deleteBatch(itemId, batchIdx, e){
+  e.stopPropagation();
+  requirePin('Delete Batch', 'Manager PIN required to delete inventory batches.', () => {
+    const item = state.items.find(i=>i.id===itemId);
+    if(!item) return;
+    const batch = item.batches[batchIdx];
+    const before = itemQty(item);
+    const removedQty = batch ? batch.qty : 0;
+    const removedCost = batch ? batch.unitCost * removedQty : null;
+    item.batches.splice(batchIdx,1);
+    const after = itemQty(item);
+    saveState();
+    writeLog('Batch Deleted', {item:item.name, qty:-removedQty, before, after, cost:removedCost, by:'Manager'});
+    renderInventory();
+    const card = document.getElementById('icard-'+itemId);
+    if(card) card.classList.add('expanded');
+  });
+}
+
+// ═══════════════════════════════════════
+//  MANAGER PIN
+// ═══════════════════════════════════════
+const PIN_KEY         = 'cs_manager_pin';
+const SESSION_MINUTES = 3;
+let pinBuffer        = '';
+let pinCallback      = null;
+let sessionExpiry    = 0; // timestamp ms
+
+// ── SHA-256 helpers (v8.4) ──────────────────────────────────
+async function hashPin(pin){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pin));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function getStoredHash(){ try{ return localStorage.getItem(PIN_KEY)||''; }catch(e){ return ''; } }
+function setPin(p){ hashPin(p).then(h=>{ try{ localStorage.setItem(PIN_KEY,h); }catch(e){} }); }
+
+// One-time migration: if stored value looks like a raw PIN (≤6 chars), hash it now
+(async function migratePinToHash(){
+  const stored = getStoredHash();
+  if(stored.length <= 6){          // plain-text PIN still stored
+    const plain = stored || '1234';
+    const h = await hashPin(plain);
+    try{ localStorage.setItem(PIN_KEY, h); }catch(e){}
+  }
+})();
+
+function isSessionActive(){
+  return Date.now() < sessionExpiry;
+}
+
+function startSession(){
+  sessionExpiry = Date.now() + SESSION_MINUTES * 60 * 1000;
+  // show session badge in topbar after a short delay so re-renders don't wipe it
+  setTimeout(updateSessionBadge, 50);
+}
+
+function updateSessionBadge(){
+  const right = document.getElementById('topbar-right');
+  if(!right || !isSessionActive()) return;
+  // add badge if not already there
+  if(!document.getElementById('session-badge')){
+    const badge = document.createElement('span');
+    badge.className = 'session-badge';
+    badge.id = 'session-badge';
+    badge.innerHTML = '🔓 Manager mode';
+    badge.title = `Session expires in ${SESSION_MINUTES} min`;
+    badge.style.cursor = 'pointer';
+    badge.onclick = lockSession;
+    right.prepend(badge);
+  }
+}
+
+function lockSession(){
+  sessionExpiry = 0;
+  const badge = document.getElementById('session-badge');
+  if(badge) badge.remove();
+}
+
+/** Main gate — if session active, run callback immediately; otherwise show PIN modal */
+function requirePin(title, sub, callback){
+  if(isSessionActive()){
+    callback();
+    return;
+  }
+  pinCallback = callback;
+  pinBuffer = '';
+  document.getElementById('pin-modal-title').textContent = title || 'Manager Access';
+  document.getElementById('pin-modal-sub').textContent   = sub   || 'Enter your 4-digit manager PIN.';
+  document.getElementById('pin-error').textContent = '';
+  updatePinDots();
+  document.getElementById('pin-overlay').classList.add('open');
+}
+
+function closePinModal(){
+  document.getElementById('pin-overlay').classList.remove('open');
+  pinBuffer   = '';
+  pinCallback = null;
+}
+
+function updatePinDots(){
+  for(let i=0;i<4;i++){
+    const dot = document.getElementById('pd'+i);
+    if(dot) dot.classList.toggle('filled', i < pinBuffer.length);
+  }
+}
+
+function pinPress(digit){
+  if(pinBuffer.length >= 4) return;
+  pinBuffer += digit;
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+  if(pinBuffer.length === 4) setTimeout(checkPin, 120);
+}
+
+function pinBackspace(){
+  pinBuffer = pinBuffer.slice(0,-1);
+  updatePinDots();
+}
+
+function pinClear(){
+  pinBuffer = '';
+  updatePinDots();
+}
+
+function checkPin(){
+  hashPin(pinBuffer).then(h=>{
+    if(h === getStoredHash()){
+      startSession();
+      document.getElementById('pin-overlay').classList.remove('open');
+      const cb = pinCallback;
+      pinBuffer   = '';
+      pinCallback = null;
+      writeLog('Manager Unlock', {by:'Manager'});
+      if(cb) cb();
+    } else {
+      document.getElementById('pin-error').textContent = 'Incorrect PIN. Try again.';
+      const dotsEl = document.getElementById('pin-dots');
+      dotsEl.style.animation = 'none';
+      dotsEl.offsetHeight;
+      dotsEl.style.animation = 'pinShake .35s ease';
+      pinBuffer = '';
+      updatePinDots();
+    }
+  });
+}
+
+// PIN change flow — two-step: confirm old, then set new
+let pinChangeStep = 0; // 0=idle, 1=confirm old, 2=enter new, 3=confirm new
+let pinNewBuffer  = '';
+
+function openChangePinFlow(){
+  pinChangeStep = 1;
+  pinNewBuffer  = '';
+  requirePin('Change PIN', 'Enter your CURRENT PIN to continue.', () => {
+    // current PIN verified — now enter new
+    pinChangeStep = 2;
+    pinBuffer = '';
+    document.getElementById('pin-modal-title').textContent = 'New PIN';
+    document.getElementById('pin-modal-sub').textContent   = 'Enter your new 4-digit PIN.';
+    document.getElementById('pin-error').textContent = '';
+    updatePinDots();
+    // swap checkPin behaviour temporarily
+    pinCallback = () => enterNewPin();
+    document.getElementById('pin-overlay').classList.add('open');
+  });
+}
+
+function enterNewPin(){
+  // called after 4 digits entered in "new PIN" step
+  pinNewBuffer = pinBuffer;
+  pinBuffer = '';
+  updatePinDots();
+  document.getElementById('pin-modal-title').textContent = 'Confirm New PIN';
+  document.getElementById('pin-modal-sub').textContent   = 'Re-enter your new PIN to confirm.';
+  document.getElementById('pin-error').textContent = '';
+  pinCallback = () => confirmNewPin();
+  document.getElementById('pin-overlay').classList.add('open');
+}
+
+function confirmNewPin(){
+  if(pinBuffer === pinNewBuffer){
+    setPin(pinNewBuffer);  // setPin hashes before storing
+    writeLog('PIN Changed', {by:'Manager'});
+    pinChangeStep = 0;
+    pinNewBuffer  = '';
+    alert('✅ Manager PIN updated successfully!');
+  } else {
+    document.getElementById('pin-error').textContent = 'PINs do not match. Try again.';
+    pinBuffer = '';
+    updatePinDots();
+    pinCallback = () => confirmNewPin();
+    document.getElementById('pin-overlay').classList.add('open');
+  }
+}
+
+// Override checkPin to support multi-step change flow
+const _origCheckPin = checkPin;
+// Patch: when pinCallback is set (change flow), use it after verification
+// (already handled above since requirePin sets pinCallback)
+
+// keyframe for shake (inject once)
+(function injectShakeKeyframe(){
+  const style = document.createElement('style');
+  style.textContent = `@keyframes pinShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}`;
+  document.head.appendChild(style);
+})();
+
+// ═══════════════════════════════════════
+//  ADD ITEM MODAL
+// ═══════════════════════════════════════
+let selectedColor = 'orange';
+
+function selectColor(el){
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedColor = el.dataset.color;
+}
+
+function openAddModal(){
+  document.getElementById('m-name').value='';
+  document.getElementById('m-sell').value='';
+  document.getElementById('m-cost').value='';
+  document.getElementById('m-pcs-per-pack').value='1';
+  document.getElementById('m-pcs-per-order').value='1';
+  document.getElementById('m-threshold').value='5';
+  document.getElementById('modal-calc-preview').style.display='none';
+  selectedColor='orange';
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
+  document.querySelector('[data-color="orange"]').classList.add('selected');
+  document.getElementById('modal-add').classList.add('open');
+}
+
+function updateModalCalc(){
+  const cost = parseFloat(document.getElementById('m-cost').value||0);
+  const ppp  = parseInt(document.getElementById('m-pcs-per-pack').value||1)||1;
+  const ppo  = parseInt(document.getElementById('m-pcs-per-order').value||1)||1;
+  const sell = parseFloat(document.getElementById('m-sell').value||0);
+  const cpp  = cost / ppp;
+  const cpo  = cpp * ppo;
+  const profit = sell - cpo;
+  const prev = document.getElementById('modal-calc-preview');
+  if(cost || sell){
+    prev.style.display='block';
+    document.getElementById('mc-cpp').textContent = 'Cost/pc: ₱'+cpp.toFixed(2);
+    document.getElementById('mc-cpo').textContent = 'Cost/order ('+ppo+'pcs): ₱'+cpo.toFixed(2);
+    const pEl = document.getElementById('mc-profit');
+    pEl.textContent = 'Profit/order: ₱'+profit.toFixed(2);
+    pEl.style.color = profit >= 0 ? 'var(--green)' : 'var(--red)';
+  } else {
+    prev.style.display='none';
+  }
+}
+
+function closeModal(){
+  document.getElementById('modal-add').classList.remove('open');
+}
+
+function closeModalOnBg(e){
+  if(e.target.id==='modal-add') closeModal();
+}
+
+function saveNewItem(){
+  const name = document.getElementById('m-name').value.trim();
+  if(!name){alert('Please enter an item name.');return;}
+  const id = 'item_'+Date.now();
+  const category = document.getElementById('m-category').value;
+  const unit = document.getElementById('m-unit').value;
+  const sellPrice  = parseFloat(document.getElementById('m-sell').value||0);
+  const costPerPack= parseFloat(document.getElementById('m-cost').value||0);
+  const pcsPerPack = parseInt(document.getElementById('m-pcs-per-pack').value||1)||1;
+  const pcsPerOrder= parseInt(document.getElementById('m-pcs-per-order').value||1)||1;
+  const threshold  = parseInt(document.getElementById('m-threshold').value||5);
+  state.items.push({id,name,category,color:selectedColor,unit,sellPrice,costPerPack,pcsPerPack,pcsPerOrder,threshold,batches:[]});
+  saveState();
+  writeLog('Item Added', {item:name, by:isSessionActive()?'Manager':'Staff', refId:id});
+  closeModal();
+  renderInventory();
+}
+
+// ═══════════════════════════════════════
+//  DELIVERIES
+// ═══════════════════════════════════════
+let deliveries = [];
+function loadDeliveries(){ try{ const d=localStorage.getItem('cs_deliveries'); if(d) deliveries=JSON.parse(d); }catch(e){ deliveries=[]; } }
+function saveDeliveries(){ try{ localStorage.setItem('cs_deliveries',JSON.stringify(deliveries)); }catch(e){} }
+loadDeliveries();
+
+let delLineCount = 0;
+
+function showDeliveryForm(){
+  document.getElementById('del-list-view').style.display = 'none';
+  document.getElementById('del-form-view').style.display = 'block';
+  // set today's date
+  document.getElementById('del-date').value = todayStr();
+  document.getElementById('del-vendor').value = '';
+  document.getElementById('del-notes').value = '';
+  document.getElementById('del-lines').innerHTML = '';
+  document.getElementById('del-total').textContent = '₱0';
+  document.getElementById('del-save-error').style.display = 'none';
+  delLineCount = 0;
+  document.getElementById('del-form-view').dataset.editIdx = '';
+  // populate vendor datalist with past vendors
+  const vendors = [...new Set(deliveries.map(d=>d.vendor).filter(Boolean))];
+  document.getElementById('del-vendor-list').innerHTML = vendors.map(v=>`<option value="${v}">`).join('');
+  // add first line
+  addDeliveryLine();
+  // also update topbar button to match
+  const right = document.getElementById('topbar-right');
+  right.innerHTML = '';
+}
+
+function hideDeliveryForm(){
+  document.getElementById('del-form-view').style.display = 'none';
+  document.getElementById('del-list-view').style.display = 'block';
+  // restore topbar button
+  const right = document.getElementById('topbar-right');
+  right.innerHTML = `<button class="btn-add" onclick="showDeliveryForm()">＋ New Delivery</button>`;
+  renderDeliveries();
+}
+
+function addDeliveryLine(){
+  const id = delLineCount++;
+  const container = document.getElementById('del-lines');
+  const itemOptions = state.items.map(i=>`<option value="${i.id}">${i.name} (${i.unit})</option>`).join('');
+  const div = document.createElement('div');
+  div.className = 'del-line-row';
+  div.id = 'dline-' + id;
+  div.innerHTML = `
+    <div style="flex:2;min-width:0">
+      <div class="del-line-lbl">Item</div>
+      <select class="del-select" id="dsel-${id}">
+        <option value="">Select item…</option>
+        ${itemOptions}
+      </select>
+    </div>
+    <div>
+      <div class="del-line-lbl">QTY (PCS)</div>
+      <input type="number" class="del-num" id="dqty-${id}" value="0" min="0" oninput="updateDelTotal()">
+    </div>
+    <div>
+      <div class="del-line-lbl">COST/UNIT ₱</div>
+      <input type="number" class="del-num cost" id="dcost-${id}" value="0" min="0" step="0.01" oninput="updateDelTotal()">
+    </div>
+    <div>
+      <div class="del-line-lbl">EXPIRY <span style="color:var(--txt3);font-weight:400">(opt)</span></div>
+      <input type="date" class="del-num" id="dexpiry-${id}" style="width:130px;color:var(--txt2);font-size:12px">
+    </div>
+    <button class="del-line-del" onclick="removeDeliveryLine(${id})" title="Remove line">✕</button>`;
+  container.appendChild(div);
+
+  // Auto-fill cost from item default when item is selected
+  document.getElementById('dsel-'+id).addEventListener('change', function(){
+    const item = state.items.find(i=>i.id===this.value);
+    if(item){
+      const costInput = document.getElementById('dcost-'+id);
+      if(parseFloat(costInput.value||0)===0){
+        costInput.value = item.costPerPack || 0;
+      }
+    }
+    updateDelTotal();
+  });
+}
+
+function removeDeliveryLine(id){
+  const el = document.getElementById('dline-'+id);
+  if(el) el.remove();
+  updateDelTotal();
+}
+
+function updateDelTotal(){
+  let total = 0;
+  document.querySelectorAll('.del-line-row').forEach(row => {
+    const id = row.id.replace('dline-','');
+    const qty  = parseFloat(document.getElementById('dqty-'+id)?.value||0);
+    const cost = parseFloat(document.getElementById('dcost-'+id)?.value||0);
+    total += qty * cost;
+  });
+  document.getElementById('del-total').textContent = '₱' + total.toLocaleString('en-PH', {minimumFractionDigits:0, maximumFractionDigits:2});
+}
+
+function saveDelivery(){
+  const vendor = document.getElementById('del-vendor').value.trim();
+  const date   = document.getElementById('del-date').value || todayStr();
+  const notes  = document.getElementById('del-notes').value.trim();
+  const errEl  = document.getElementById('del-save-error');
+
+  // collect lines
+  const lines = [];
+  let hasError = false;
+  document.querySelectorAll('.del-line-row').forEach(row => {
+    const id   = row.id.replace('dline-','');
+    const itemId = document.getElementById('dsel-'+id)?.value||'';
+    const qty    = parseInt(document.getElementById('dqty-'+id)?.value||0);
+    const cost   = parseFloat(document.getElementById('dcost-'+id)?.value||0);
+    if(!itemId){ hasError = true; return; }
+    if(qty <= 0){ hasError = true; return; }
+    const item = state.items.find(i=>i.id===itemId);
+    if(!item) return;
+    const expiry = document.getElementById('dexpiry-'+id)?.value || '';
+    lines.push({ itemId, itemName: item.name, unit: item.unit, qty, unitCost: cost, lineTotal: qty * cost, ...(expiry ? {expiryDate: expiry} : {}) });
+  });
+
+  if(!vendor){ errEl.textContent='Please enter a vendor name.'; errEl.style.display='block'; return; }
+  if(lines.length===0){ errEl.textContent='Add at least one item with quantity > 0.'; errEl.style.display='block'; return; }
+  if(hasError){ errEl.textContent='Please select an item and enter qty > 0 for all lines.'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+
+  // Check if editing an existing delivery
+  const formView = document.getElementById('del-form-view');
+  const editIdx  = formView.dataset.editIdx !== undefined && formView.dataset.editIdx !== '' ? parseInt(formView.dataset.editIdx) : -1;
+
+  if(editIdx >= 0){
+    // Remove old inventory batches tied to this delivery
+    const old = deliveries[editIdx];
+    if(old){
+      old.lines.forEach(line => {
+        const item = state.items.find(i=>i.id===line.itemId);
+        if(!item) return;
+        const bIdx = item.batches.findIndex(b=>b.deliveryId===old.id);
+        if(bIdx > -1) item.batches.splice(bIdx, 1);
+      });
+    }
+    const editTotal = lines.reduce((s,l)=>s+l.lineTotal, 0);
+    // Replace delivery record in place
+    const delivery = {
+      id: old ? old.id : 'DEL-'+Date.now(),
+      vendor, date, notes, lines, totalCost: editTotal,
+      savedAt: new Date().toISOString(), editedAt: new Date().toISOString()
+    };
+    deliveries[editIdx] = delivery;
+    saveDeliveries();
+    // Push updated batches
+    lines.forEach(line => {
+      const item = state.items.find(i=>i.id===line.itemId);
+      if(!item) return;
+      item.batches.push({ qty: line.qty, unitCost: line.unitCost, date, deliveryId: delivery.id, vendor, ...(line.expiryDate ? {expiryDate: line.expiryDate} : {}) });
+    });
+    saveState();
+    // Log edit
+    lines.forEach(line => {
+      writeLog('Delivery Edited', {item:line.itemName, qty:line.qty, cost:line.lineTotal, vendor, refId:delivery.id, by:'Manager'});
+    });
+    formView.dataset.editIdx = '';
+    hideDeliveryForm();
+    return;
+  }
+
+  // Calculate total
+  const totalCost = lines.reduce((s,l)=>s+l.lineTotal, 0);
+
+  // Save delivery record
+  const delivery = {
+    id: 'DEL-' + Date.now(),
+    vendor, date, notes, lines, totalCost,
+    savedAt: new Date().toISOString()
+  };
+  deliveries.unshift(delivery);
+  saveDeliveries();
+
+  // Push batches into inventory for each line and log
+  lines.forEach(line => {
+    const item = state.items.find(i=>i.id===line.itemId);
+    if(!item) return;
+    const before = itemQty(item);
+    item.batches.push({
+      qty:      line.qty,
+      unitCost: line.unitCost,
+      date:     line.date || date,
+      deliveryId: delivery.id,
+      vendor,
+      ...(line.expiryDate ? {expiryDate: line.expiryDate} : {})
+    });
+    const after = itemQty(item);
+    writeLog('Delivery In', {item:line.itemName, qty:+line.qty, before, after, cost:line.lineTotal, vendor, refId:delivery.id, by:isSessionActive()?'Manager':'Staff'});
+  });
+  saveState();
+
+  // Done — go back to list
+  hideDeliveryForm();
+}
+
+function renderDeliveries(){
+  const listView = document.getElementById('del-list-view');
+  if(!listView) return;
+
+  // ensure form is hidden
+  document.getElementById('del-form-view').style.display = 'none';
+  listView.style.display = 'block';
+
+  const right = document.getElementById('topbar-right');
+  right.innerHTML = `<button class="btn-add" onclick="showDeliveryForm()">＋ New Delivery</button>`;
+
+  const countLabel = document.getElementById('del-count-label');
+  const recordsEl  = document.getElementById('del-records');
+
+  if(!deliveries.length){
+    countLabel.textContent = 'No deliveries recorded yet';
+    recordsEl.innerHTML = `<div class="page-ph"><span class="ph-ico">🚛</span><div class="ph-title">No deliveries yet</div><div class="ph-sub">Tap "+ New Delivery" to record your first vendor delivery.</div></div>`;
+    return;
+  }
+
+  countLabel.textContent = `${deliveries.length} deliver${deliveries.length===1?'y':'ies'} recorded`;
+
+  recordsEl.innerHTML = deliveries.map((d, idx) => {
+    const chips = d.lines.map(l =>
+      `<span class="del-chip">${l.itemName} × ${l.qty} @ ₱${l.unitCost}</span>`
+    ).join('');
+    const notesHtml = d.notes ? `<div style="font-size:11px;color:var(--txt3);margin-top:8px">📝 ${d.notes}</div>` : '';
+    return `<div class="del-record">
+      <div class="del-rec-top">
+        <div>
+          <div class="del-rec-vendor">${d.vendor || '—'}</div>
+          <div class="del-rec-date">${d.date} · ${d.lines.length} item${d.lines.length===1?'':'s'}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="del-rec-total">₱${(d.totalCost||0).toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:2})}</div>
+        </div>
+      </div>
+      <div class="del-rec-chips">${chips}</div>
+      ${notesHtml}
+      <div style="display:flex;gap:7px;margin-top:12px;padding-top:10px;border-top:1px solid var(--bdr)">
+        <span style="font-size:10px;color:var(--txt3);display:flex;align-items:center;gap:4px;margin-right:4px">🔐 Manager only:</span>
+        <button class="del-mgr-btn" onclick="editDelivery(${idx})">✏️ Edit</button>
+        <button class="del-mgr-btn danger" onclick="deleteDelivery(${idx})">🗑 Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteDelivery(idx){
+  requirePin('Delete Delivery', 'Manager PIN required to delete delivery records.', () => {
+    const d = deliveries[idx];
+    if(!d) return;
+    // Log before removing
+    d.lines.forEach(line => {
+      writeLog('Delivery Deleted', {item:line.itemName, qty:-line.qty, cost:line.lineTotal, vendor:d.vendor, refId:d.id, by:'Manager'});
+    });
+    // Also remove associated batches from inventory
+    d.lines.forEach(line => {
+      const item = state.items.find(i=>i.id===line.itemId);
+      if(!item) return;
+      const bIdx = item.batches.findIndex(b=>b.deliveryId===d.id);
+      if(bIdx > -1) item.batches.splice(bIdx, 1);
+    });
+    deliveries.splice(idx, 1);
+    saveDeliveries();
+    saveState();
+    renderDeliveries();
+  });
+}
+
+function editDelivery(idx){
+  requirePin('Edit Delivery', 'Manager PIN required to edit delivery records.', () => {
+    const d = deliveries[idx];
+    if(!d) return;
+    // Show form pre-filled
+    document.getElementById('del-list-view').style.display = 'none';
+    document.getElementById('del-form-view').style.display = 'block';
+    document.getElementById('del-date').value   = d.date || todayStr();
+    document.getElementById('del-vendor').value = d.vendor || '';
+    document.getElementById('del-notes').value  = d.notes  || '';
+    document.getElementById('del-lines').innerHTML = '';
+    document.getElementById('del-save-error').style.display = 'none';
+    delLineCount = 0;
+
+    // Populate vendor datalist
+    const vendors = [...new Set(deliveries.map(dv=>dv.vendor).filter(Boolean))];
+    document.getElementById('del-vendor-list').innerHTML = vendors.map(v=>`<option value="${v}">`).join('');
+
+    // Add pre-filled lines
+    d.lines.forEach(line => {
+      addDeliveryLine();
+      const id = delLineCount - 1;
+      const selEl = document.getElementById('dsel-'+id);
+      if(selEl) selEl.value = line.itemId;
+      const qtyEl = document.getElementById('dqty-'+id);
+      if(qtyEl) qtyEl.value = line.qty;
+      const costEl = document.getElementById('dcost-'+id);
+      if(costEl) costEl.value = line.unitCost;
+      const expiryEl = document.getElementById('dexpiry-'+id);
+      if(expiryEl && line.expiryDate) expiryEl.value = line.expiryDate;
+    });
+    updateDelTotal();
+
+    // Update topbar
+    document.getElementById('topbar-right').innerHTML = '';
+
+    // Mark form as editing this index so save replaces instead of appending
+    document.getElementById('del-form-view').dataset.editIdx = idx;
+  });
+}
+
+// ═══════════════════════════════════════
+//  BACKUP & RESTORE
+// ═══════════════════════════════════════
+function exportBackup(){
+  const backup = {
+    version:      'cs_backup_v1',
+    exportedAt:   new Date().toISOString(),
+    appVersion:   'v8.1',
+    state:        JSON.parse(localStorage.getItem('cs_inv_v1')           || 'null'),
+    deliveries:   JSON.parse(localStorage.getItem('cs_deliveries')       || '[]'),
+    auditLog:     JSON.parse(localStorage.getItem('cs_audit_log_v1')     || '[]'),
+    activeShift:  JSON.parse(localStorage.getItem('cs_active_shift_v1')  || 'null'),
+    shiftHistory: JSON.parse(localStorage.getItem('cs_shift_history_v1') || '[]'),
+    managerPin:   localStorage.getItem('cs_manager_pin') || '1234',
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const date = new Date().toISOString().slice(0,10);
+  a.href     = url;
+  a.download = 'cartshift-backup-' + date + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  const el = document.getElementById('backup-status');
+  if(el){
+    el.style.color   = 'var(--green)';
+    el.textContent   = '✓ Backup downloaded — ' + new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'});
+  }
+}
+
+function importBackup(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const backup = JSON.parse(e.target.result);
+      // Validate it's a CartShift backup
+      if(!backup.version || !backup.version.startsWith('cs_backup')){
+        alert('❌ Invalid file.\n\nPlease select a CartShift backup file (.json).');
+        input.value = '';
+        return;
+      }
+      const exportedDate = backup.exportedAt
+        ? new Date(backup.exportedAt).toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'})
+        : 'Unknown date';
+      const ok = confirm(
+        '⚠️  Restore from backup?\n\n' +
+        'Backup date: ' + exportedDate + '\n' +
+        'App version: ' + (backup.appVersion || 'unknown') + '\n\n' +
+        'This will REPLACE all current data with the backup.\n' +
+        'This action cannot be undone.\n\nContinue?'
+      );
+      if(!ok){ input.value = ''; return; }
+      requirePin('Restore Backup', 'Manager PIN required to restore a backup.', () => {
+        if(backup.state)        localStorage.setItem('cs_inv_v1',           JSON.stringify(backup.state));
+        if(backup.deliveries)   localStorage.setItem('cs_deliveries',       JSON.stringify(backup.deliveries));
+        if(backup.auditLog)     localStorage.setItem('cs_audit_log_v1',     JSON.stringify(backup.auditLog));
+        if(backup.activeShift !== undefined && backup.activeShift !== null)
+                                localStorage.setItem('cs_active_shift_v1',  JSON.stringify(backup.activeShift));
+        if(backup.shiftHistory) localStorage.setItem('cs_shift_history_v1', JSON.stringify(backup.shiftHistory));
+        if(backup.managerPin)   localStorage.setItem('cs_manager_pin',      backup.managerPin);
+        input.value = '';
+        alert('✓ Backup restored successfully!\n\nThe app will now reload.');
+        location.reload();
+      });
+    } catch(err){
+      alert('❌ Failed to read file.\n\nMake sure it is a valid CartShift backup (.json).');
+      input.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ═══════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════
+function todayStr(){
+  const d=new Date();
+  return d.toISOString().split('T')[0];
+}
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+renderDashboard();
+// Update alert nav badge on startup
+(function(){
+  const outs = state.items.filter(i=>itemQty(i)===0).length;
+  const lows = state.items.filter(i=>{ const s=stockStatus(i); return !s.isOut&&s.isLow; }).length;
+  updateAlertNavBadge(outs, lows);
+})();
+// If there was an active shift persisted, show a live dot on the Shifts nav item
+if(activeShift){
+  const navShift = document.getElementById('nav-shifts');
+  if(navShift){
+    const dot = document.createElement('span');
+    dot.style.cssText='width:7px;height:7px;border-radius:50%;background:var(--orange);margin-left:auto;animation:pulse 1.4s ease-in-out infinite;flex-shrink:0;';
+    navShift.appendChild(dot);
+  }
+}
+
+</script>
+<!-- sidebar overlay -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- mobile bottom nav -->
+<nav class="mobile-bottom-nav">
+  <div class="mbn-item" id="mbn-dashboard" onclick="showPage('dashboard',document.getElementById('nav-dashboard'))"><span class="mbn-icon">⊞</span><span>Dash</span></div>
+  <div class="mbn-item" id="mbn-inventory" onclick="showPage('inventory',document.getElementById('nav-inventory'))"><span class="mbn-icon">📦</span><span>Stock</span></div>
+  <div class="mbn-item" id="mbn-alerts" onclick="showPage('alerts',document.getElementById('nav-alerts'))" style="position:relative"><span class="mbn-icon">🔔</span><span>Alerts</span><span id="mbn-alerts-dot" style="display:none;position:absolute;top:6px;right:18px;width:8px;height:8px;border-radius:50%;background:var(--red)"></span></div>
+  <div class="mbn-item" id="mbn-shifts" onclick="showPage('shifts',document.getElementById('nav-shifts'))"><span class="mbn-icon">▶</span><span>Shift</span></div>
+  <div class="mbn-item" onclick="toggleSidebar()"><span class="mbn-icon">☰</span><span>More</span></div>
+</nav>
+
+<script>
+function toggleSidebar(){
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+document.querySelectorAll('.nav-item').forEach(function(el){
+  el.addEventListener('click',function(){
+    if(window.innerWidth<=900){
+      document.querySelector('.sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('open');
+    }
+  });
+});
+// sync bottom nav highlight
+var _sp=showPage;
+showPage=function(name,el){
+  _sp(name,el);
+  var map={dashboard:'mbn-dashboard',inventory:'mbn-inventory',shifts:'mbn-shifts',alerts:'mbn-alerts'};
+  document.querySelectorAll('.mbn-item').forEach(function(e){e.classList.remove('active');});
+  if(map[name]){var m=document.getElementById(map[name]);if(m)m.classList.add('active');}
+};
+document.getElementById('mbn-dashboard').classList.add('active');
+// show red dot on alerts mobile icon if there are issues
+(function(){
+  var items=JSON.parse(localStorage.getItem('cs_inv_v1')||'{"items":[]}').items||[];
+  var hasAlerts=items.some(function(i){return (i.batches||[]).reduce(function(s,b){return s+b.qty;},0)===0;});
+  var dot=document.getElementById('mbn-alerts-dot');
+  if(dot&&hasAlerts) dot.style.display='block';
+})();
+</script>
+</body>
+</html>
