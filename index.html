@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CartShift Inventory Pro v12.0</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&family=Unbounded:wght@600;700&display=swap" rel="stylesheet">
 <style>
@@ -1136,6 +1137,41 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'DM Sans
               <input id="ntog-long-hours" type="number" min="1" max="24" value="8" class="field-input" style="width:60px;padding:6px 8px;font-size:14px;font-family:'DM Mono',monospace;font-weight:700;color:var(--orange);text-align:center" oninput="saveNotifSettings()">
               <span style="font-size:12px;color:var(--txt3)">hrs</span>
             </div>
+          </div>
+        </div>
+
+        <!-- ── EMAIL NOTIFICATIONS (v13) ── -->
+        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:22px;margin-bottom:12px" id="emailjs-settings-section">
+          <div style="font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">📧 Email Notifications (EmailJS)</div>
+          <div style="font-size:13px;color:var(--txt2);margin-bottom:16px;line-height:1.6">
+            Get emailed when a shift ends, stock runs out, or suspicious activity is detected.<br><br>
+            <strong style="color:var(--orange)">Setup (free, 3 steps):</strong><br>
+            1. Sign up at <a href="https://www.emailjs.com" target="_blank" style="color:var(--blue)">emailjs.com</a> → get your <strong>Public Key</strong><br>
+            2. Create an <strong>Email Service</strong> (connect Gmail) → copy the <strong>Service ID</strong><br>
+            3. Create an <strong>Email Template</strong> using the variables below → copy the <strong>Template ID</strong><br><br>
+            <span style="font-size:11px;color:var(--txt3)">Template variables you can use: <code style="background:var(--bg4);padding:2px 6px;border-radius:4px;color:var(--orange)">{{subject}}</code> <code style="background:var(--bg4);padding:2px 6px;border-radius:4px;color:var(--orange)">{{body}}</code> <code style="background:var(--bg4);padding:2px 6px;border-radius:4px;color:var(--orange)">{{to_email}}</code></span>
+          </div>
+
+          <div class="field-group">
+            <label class="field-lbl">EmailJS Public Key</label>
+            <input id="ejs-public-key" class="field-input" type="text" placeholder="e.g. abc123XYZ_…" oninput="saveEmailJSSettings()">
+          </div>
+          <div class="field-group">
+            <label class="field-lbl">Service ID</label>
+            <input id="ejs-service-id" class="field-input" type="text" placeholder="e.g. service_xxxxxxx" oninput="saveEmailJSSettings()">
+          </div>
+          <div class="field-group">
+            <label class="field-lbl">Template ID</label>
+            <input id="ejs-template-id" class="field-input" type="text" placeholder="e.g. template_xxxxxxx" oninput="saveEmailJSSettings()">
+          </div>
+          <div class="field-group">
+            <label class="field-lbl">Send alerts to (your email)</label>
+            <input id="ejs-to-email" class="field-input" type="email" placeholder="you@gmail.com" oninput="saveEmailJSSettings()">
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;margin-top:4px;flex-wrap:wrap">
+            <button onclick="testEmailJS()" style="background:var(--blue-l);border:1px solid var(--blue-b);color:var(--blue);border-radius:var(--rm);padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .12s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">📨 Send Test Email</button>
+            <div id="ejs-test-status" style="font-size:12px;min-height:18px"></div>
           </div>
         </div>
 
@@ -4343,7 +4379,127 @@ renderDashboard = function(){
 };
 
 // ═══════════════════════════════════════
-//  UTILS
+//  v13: EMAILJS ENGINE
+// ═══════════════════════════════════════
+const EJS_SETTINGS_KEY = 'cs_emailjs_settings_v1';
+let ejsSettings = { publicKey:'', serviceId:'', templateId:'', toEmail:'' };
+
+(function loadEJSSettings(){
+  try{
+    const d = localStorage.getItem(EJS_SETTINGS_KEY);
+    if(d) ejsSettings = Object.assign({}, ejsSettings, JSON.parse(d));
+  }catch(e){}
+})();
+
+function saveEmailJSSettings(){
+  ejsSettings.publicKey  = document.getElementById('ejs-public-key')?.value.trim()  || '';
+  ejsSettings.serviceId  = document.getElementById('ejs-service-id')?.value.trim()  || '';
+  ejsSettings.templateId = document.getElementById('ejs-template-id')?.value.trim() || '';
+  ejsSettings.toEmail    = document.getElementById('ejs-to-email')?.value.trim()    || '';
+  try{ localStorage.setItem(EJS_SETTINGS_KEY, JSON.stringify(ejsSettings)); }catch(e){}
+}
+
+function renderEmailJSSettingsUI(){
+  const set = (id, v) => { const el=document.getElementById(id); if(el) el.value=v; };
+  set('ejs-public-key',  ejsSettings.publicKey);
+  set('ejs-service-id',  ejsSettings.serviceId);
+  set('ejs-template-id', ejsSettings.templateId);
+  set('ejs-to-email',    ejsSettings.toEmail);
+}
+
+function ejsReady(){
+  return ejsSettings.publicKey && ejsSettings.serviceId && ejsSettings.templateId && ejsSettings.toEmail;
+}
+
+async function sendEmail(subject, body){
+  if(!ejsReady()) return;
+  try{
+    emailjs.init({ publicKey: ejsSettings.publicKey });
+    await emailjs.send(ejsSettings.serviceId, ejsSettings.templateId, {
+      subject,
+      body,
+      to_email: ejsSettings.toEmail,
+    });
+  }catch(e){
+    console.warn('EmailJS error:', e);
+  }
+}
+
+async function testEmailJS(){
+  const statusEl = document.getElementById('ejs-test-status');
+  if(!ejsReady()){
+    if(statusEl) statusEl.innerHTML = '<span style="color:var(--red)">⚠ Fill in all 4 fields first.</span>';
+    return;
+  }
+  if(statusEl) statusEl.innerHTML = '<span style="color:var(--txt3)">Sending…</span>';
+  try{
+    emailjs.init({ publicKey: ejsSettings.publicKey });
+    await emailjs.send(ejsSettings.serviceId, ejsSettings.templateId, {
+      subject: '✅ CartShift Test Email',
+      body: 'This is a test notification from CartShift Inventory Pro. If you received this, your EmailJS setup is working correctly!',
+      to_email: ejsSettings.toEmail,
+    });
+    if(statusEl) statusEl.innerHTML = '<span style="color:var(--green)">✅ Email sent! Check your inbox.</span>';
+  }catch(e){
+    if(statusEl) statusEl.innerHTML = `<span style="color:var(--red)">❌ Failed: ${e?.text || e?.message || 'Check your credentials.'}</span>`;
+  }
+}
+
+// ── Email triggers (hooked into existing notif functions) ──────
+const _origNotifyShiftEnd_v13 = notifyShiftEnd;
+notifyShiftEnd = function(sh){
+  _origNotifyShiftEnd_v13(sh);
+  if(!notifSettings.shiftEnd) return;
+  const revenue = (sh.revenue||0).toLocaleString('en-PH',{maximumFractionDigits:0});
+  const profit  = (sh.profit||0).toLocaleString('en-PH',{maximumFractionDigits:0});
+  const totalSold = (sh.returns||[]).reduce((s,r)=>s+r.soldQty,0);
+  const dt = new Date().toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'});
+  const lines = (sh.returns||[]).filter(r=>r.soldQty>0).map(r=>`  • ${r.name}: ${r.soldQty} sold, ${r.returnQty||0} returned`).join('\n');
+  sendEmail(
+    `🏁 Shift Complete — ${sh.staff}`,
+    `Shift ended at ${dt}\nStaff: ${sh.staff}\n\nRevenue: ₱${revenue}\nProfit: ₱${profit}\nItems sold: ${totalSold}\n\n${lines}\n\nCash notes: ${sh.cashNotes||'—'}`
+  );
+};
+
+const _origNotifyShiftFlags_v13 = notifyShiftFlags;
+notifyShiftFlags = function(sh, flags){
+  _origNotifyShiftFlags_v13(sh, flags);
+  if(!notifSettings.suspicious) return;
+  const danger = flags.filter(f=>f.level==='danger');
+  if(!danger.length) return;
+  const dt = new Date().toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'});
+  const flagLines = danger.map(f=>`  ⚠ ${f.msg.replace(/<[^>]+>/g,'')}`).join('\n');
+  sendEmail(
+    `🚨 Suspicious Activity — ${sh.staff}`,
+    `Alert generated at ${dt}\nStaff: ${sh.staff}\n\n${danger.length} danger flag${danger.length===1?'':'s'} detected:\n${flagLines}\n\nPlease review the Staff Performance page in CartShift.`
+  );
+};
+
+const _origNotifyStockIssues_v13 = notifyStockIssues;
+notifyStockIssues = function(){
+  _origNotifyStockIssues_v13();
+  if(!notifSettings.stock) return;
+  const outs = state.items.filter(i=>itemQty(i)===0);
+  const lows = state.items.filter(i=>{ const s=stockStatus(i); return !s.isOut&&s.isLow; });
+  if(!outs.length && !lows.length) return;
+  const dt = new Date().toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'});
+  let body = `Stock alert at ${dt}\n\n`;
+  if(outs.length) body += `OUT OF STOCK (${outs.length}):\n${outs.map(i=>`  • ${i.name}`).join('\n')}\n\n`;
+  if(lows.length) body += `RUNNING LOW (${lows.length}):\n${lows.map(i=>`  • ${i.name}`).join('\n')}\n`;
+  const subject = outs.length
+    ? `📦 ${outs.length} item${outs.length===1?'':'s'} out of stock — CartShift`
+    : `📦 ${lows.length} item${lows.length===1?'':'s'} running low — CartShift`;
+  sendEmail(subject, body);
+};
+
+// Patch showPage to also render EmailJS settings UI
+const _sp_v13 = showPage;
+showPage = function(name, el){
+  _sp_v13(name, el);
+  if(name==='settings') renderEmailJSSettingsUI();
+};
+
+// ═══════════════════════════════════════
 // ═══════════════════════════════════════
 function todayStr(){
   const d=new Date();
