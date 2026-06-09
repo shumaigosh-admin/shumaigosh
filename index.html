@@ -4612,8 +4612,7 @@ async function checkLogin(){
   const hashU = await sha256(u);
   const hashP = await sha256(p);
   // SHA256 of your username and password
-const correctU = '3497fad4b3162927c33a33cbfab96b5b2359ea13311b8bf4592db3aa8b1c4b8b
-';
+const correctU = '3497fad4b3162927c33a33cbfab96b5b2359ea13311b8bf4592db3aa8b1c4b8b';
 const correctP = 'acfb1c679cad41357529069627807628d8402c5664de3258e9446fe37fdac932';
   if(hashU === correctU && hashP === correctP){
     document.getElementById('login-screen').style.display='none';
