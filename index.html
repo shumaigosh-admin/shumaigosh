@@ -718,6 +718,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'DM Sans
       <span class="topbar-sub" id="topbar-sub">CartShift Inventory Pro</span>
     </div>
     <div class="topbar-right" id="topbar-right">
+      <button onclick="logout()" style="background:var(--red-l);border:1px solid var(--red-b);color:var(--red);border-radius:var(--rm);padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">🔒 Logout</button>
       <button class="notif-bell-btn" id="notif-bell-btn" onclick="toggleNotifDrawer()" title="Notifications">
         🔔
         <span class="notif-bell-badge" id="notif-bell-badge" style="display:none">0</span>
@@ -4612,8 +4613,8 @@ async function checkLogin(){
   const hashU = await sha256(u);
   const hashP = await sha256(p);
   // SHA256 of your username and password
-const correctU = '3497fad4b3162927c33a33cbfab96b5b2359ea13311b8bf4592db3aa8b1c4b8b';
-const correctP = 'acfb1c679cad41357529069627807628d8402c5664de3258e9446fe37fdac932';
+  const correctU = '3497fad4b3162927c33a33cbfab96b5b2359ea13311b8bf4592db3aa8b1c4b8b';
+  const correctP = 'acfb1c679cad41357529069627807628d8402c5664de3258e9446fe37fdac932';
   if(hashU === correctU && hashP === correctP){
     document.getElementById('login-screen').style.display='none';
     sessionStorage.setItem('cs_auth','1');
@@ -4624,6 +4625,10 @@ const correctP = 'acfb1c679cad41357529069627807628d8402c5664de3258e9446fe37fdac9
 async function sha256(msg){
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function logout(){
+  sessionStorage.removeItem('cs_auth');
+  document.getElementById('login-screen').style.display='flex';
 }
 if(sessionStorage.getItem('cs_auth')==='1'){
   document.addEventListener('DOMContentLoaded',()=>{
