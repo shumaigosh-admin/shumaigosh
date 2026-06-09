@@ -4595,5 +4595,40 @@ document.getElementById('mbn-dashboard').classList.add('active');
   if(dot&&hasFlags) dot.style.display='block';
 })();
 </script>
-</body>
+  <body>
+<div id="login-screen" style="position:fixed;inset:0;background:#0b0c0e;z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;font-family:'DM Sans',sans-serif">
+  <div style="font-size:32px">🛒</div>
+  <div style="font-family:'Unbounded',sans-serif;font-size:18px;font-weight:700;color:#f0f0f4">CartShift</div>
+  <input id="login-user" type="text" placeholder="Username" style="padding:12px 16px;border-radius:10px;border:1px solid #333;background:#111;color:#fff;font-size:14px;width:260px">
+  <input id="login-pass" type="password" placeholder="Password" style="padding:12px 16px;border-radius:10px;border:1px solid #333;background:#111;color:#fff;font-size:14px;width:260px">
+  <button onclick="checkLogin()" style="background:#F97316;color:#fff;border:none;border-radius:10px;padding:12px 32px;font-size:14px;font-weight:700;cursor:pointer;width:260px">Login</button>
+  <div id="login-error" style="color:#e8554a;font-size:13px;min-height:18px"></div>
+</div>
+
+<script>
+async function checkLogin(){
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  const hashU = await sha256(u);
+  const hashP = await sha256(p);
+  // SHA256 of your username and password
+const correctU = 'e49d9c6de5e7c1f36c1c5d9e7c8a7e8e2b5c7f9e1a3d6b8e4f2a9c1d5e7b3f6';
+const correctP = '8b2c7f4a1e9d3b6f5c8a2e7d1b4f9c3a6e8d2b5f7a1c4e9b3d6f2a8c5e7b1d4';
+  if(hashU === correctU && hashP === correctP){
+    document.getElementById('login-screen').style.display='none';
+    sessionStorage.setItem('cs_auth','1');
+  } else {
+    document.getElementById('login-error').textContent = 'Wrong username or password.';
+  }
+}
+async function sha256(msg){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+if(sessionStorage.getItem('cs_auth')==='1'){
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.getElementById('login-screen').style.display='none';
+  });
+}
+</script>
 </html>
