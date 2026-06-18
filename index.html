@@ -1,11 +1,13 @@
-<!DOCTYPE html>
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CartShift Inventory Pro v12.0</title>
-<script src="./CartShift Inventory Pro v12.0_files/email.min.js.download"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com/">
-<link href="./CartShift Inventory Pro v12.0_files/css2" rel="stylesheet">
+<title>CartShift Inventory Pro v13.4</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&family=Unbounded:wght@600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
@@ -226,6 +228,24 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'DM Sans
 .ph-ico{font-size:42px;margin-bottom:12px;display:block;opacity:.4;}
 .ph-title{font-size:16px;font-weight:600;color:var(--txt2);margin-bottom:6px;}
 .ph-sub{font-size:13px;color:var(--txt3);}
+
+/* ── EXPENSE STYLES (v13.1) ── */
+.expense-list{display:flex;flex-direction:column;gap:6px;margin-top:6px;}
+.expense-row{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--rs);padding:10px 12px;}
+.expense-cat-badge{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:var(--purple-l);border:1px solid var(--purple-b);color:var(--purple);border-radius:999px;padding:2px 9px;white-space:nowrap;flex-shrink:0;}
+.expense-note{flex:1;font-size:13px;color:var(--txt2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.expense-amount{font-size:14px;font-weight:700;font-family:'DM Mono',monospace;color:var(--red);white-space:nowrap;flex-shrink:0;}
+.expense-del{width:22px;height:22px;border-radius:50%;background:var(--red-l);border:1px solid var(--red-b);color:var(--red);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .12s;}
+.expense-del:hover{opacity:.7;}
+.expense-total-bar{display:flex;align-items:center;justify-content:space-between;background:var(--red-l);border:1px solid var(--red-b);border-radius:var(--rs);padding:10px 14px;margin-top:8px;}
+.expense-total-lbl{font-size:12px;font-weight:600;color:var(--red);}
+.expense-total-val{font-size:16px;font-weight:700;font-family:'DM Mono',monospace;color:var(--red);}
+.btn-add-expense{background:var(--purple-l);border:1px solid var(--purple-b);color:var(--purple);border-radius:var(--rm);padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;transition:opacity .14s;white-space:nowrap;}
+.btn-add-expense:hover{opacity:.8;}
+.cat-select-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:0;}
+.cat-option{padding:10px 12px;border-radius:var(--rs);border:1px solid var(--bdr2);background:var(--bg3);color:var(--txt2);font-size:13px;font-weight:600;cursor:pointer;text-align:center;transition:background .12s,border-color .12s,color .12s;user-select:none;}
+.cat-option:hover{background:var(--bg4);color:var(--txt);}
+.cat-option.selected{background:var(--purple-l);border-color:var(--purple-b);color:var(--purple);}
 
 /* ── PIN MODAL ── */
 .pin-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .18s;}
@@ -460,7 +480,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'DM Sans
 .ssb-icon{font-size:32px;}
 .ssb-title{font-family:'Unbounded',sans-serif;font-size:16px;font-weight:700;color:var(--green);}
 .ssb-sub{font-size:12px;color:var(--txt3);margin-top:3px;}
-.ssb-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.ssb-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+@media(max-width:500px){.ssb-stat-row{grid-template-columns:repeat(2,1fr);}}
 .ssb-stat{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--rm);padding:12px 14px;text-align:center;}
 .ssb-stat-lbl{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
 .ssb-stat-val{font-size:18px;font-weight:700;font-family:'DM Mono',monospace;}
@@ -678,252 +699,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'DM Sans
   .notif-drawer{top:52px;right:8px;left:8px;width:auto;}
   .notif-toast-wrap{bottom:66px;}
 }
-
-/* ══════════════════════════════════════
-   MOBILE REDESIGN — touch-first fixes
-══════════════════════════════════════ */
-
-/* Prevent iOS auto-zoom on input focus (must be 16px+) */
-input[type="text"], input[type="number"], input[type="date"],
-input[type="email"], input[type="password"], select, textarea {
-  font-size: 16px;
-}
-
-/* ── Universal touch targets ── */
-.field-input, .batch-input, .del-select,
-.ledger-search, .ledger-date, .shift-staff-input,
-.cash-input, .rst-input, .rst-pct-input,
-.cash-recon-input {
-  min-height: 46px;
-  padding: 10px 14px;
-  border-radius: var(--rm);
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-/* ── Delivery line row: card-style stacking on mobile ── */
-@media(max-width:900px){
-  .del-line-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-    background: var(--bg3);
-    border: 1px solid var(--bdr2);
-    border-bottom: 1px solid var(--bdr2) !important;
-    border-radius: var(--rm);
-    padding: 12px;
-    margin-bottom: 8px;
-  }
-  .del-line-row > div { width: 100% !important; }
-  .del-select { flex: 1 1 100%; width: 100% !important; min-height: 46px; font-size: 16px; }
-  .del-num {
-    width: 100% !important;
-    text-align: left;
-    min-height: 46px;
-    font-size: 16px;
-    padding: 10px 14px;
-  }
-  .del-num[type="date"] { width: 100% !important; color: var(--txt2); }
-  .del-line-del {
-    width: 100%;
-    border-radius: var(--rs);
-    height: 38px;
-    font-size: 13px;
-    margin-top: 2px;
-  }
-  /* Delivery form: expiry override for inline-styled input */
-  #del-lines input[type="date"] {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-  
-  /* Batch form: 2 cols on tablet */
-  .batch-form { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .batch-input { min-height: 44px; font-size: 16px; padding: 9px 12px; }
-  .btn-batch { min-height: 44px; padding: 10px 14px; font-size: 13px; }
-  
-  /* CLI qty inputs (shift load) */
-  .cli-qty { min-height: 44px; width: 72px; font-size: 16px; }
-  
-  /* Restock item row */
-  .rst-item {
-    flex-wrap: wrap;
-    gap: 12px;
-    row-gap: 10px;
-  }
-  .rst-name { flex: 1 1 100%; }
-  .rst-input, .rst-pct-input { min-height: 44px; font-size: 16px; width: 80px; }
-  
-  /* End shift return inputs */
-  .est-return-input { min-height: 44px; width: 72px; font-size: 16px; }
-  
-  /* Cash recon input */
-  .cash-recon-input { min-height: 44px; width: 100%; font-size: 16px; }
-  .cash-recon-row { flex-wrap: wrap; gap: 8px; }
-  
-  /* Ledger search */
-  .ledger-search { min-height: 44px; font-size: 16px; }
-  .ledger-date { min-height: 44px; font-size: 14px; }
-  
-  /* Shift active: item cards */
-  .sic-qty { min-height: 44px; width: 72px; font-size: 16px; }
-  .btn-sic { min-height: 44px; padding: 8px 14px; font-size: 12px; }
-  
-  /* Shift end table: horizontal scroll container */
-  .shift-end-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--r); }
-  .end-shift-table { min-width: 520px; }
-  
-  /* Buttons in general */
-  .btn-add, .btn-shift-start, .btn-confirm-end,
-  .btn-save, .btn-cancel { min-height: 46px; }
-  
-  /* Pin keys bigger */
-  .pin-key { padding: 16px; font-size: 20px; min-height: 56px; }
-  
-  /* Shift steps on mobile */
-  .shift-steps { gap: 4px; }
-  .shift-step-label { font-size: 10px; }
-  .shift-step-connector { max-width: 20px; }
-}
-
-/* ── Phone ≤480px: full single-column forms ── */
-@media(max-width:480px){
-  /* Batch form: single column */
-  .batch-form {
-    grid-template-columns: 1fr;
-  }
-  .batch-form .btn-batch { grid-column: 1 / -1; }
-  
-  /* End-shift table: make each row a card */
-  .end-shift-table thead { display: none; }
-  .end-shift-table, .end-shift-table tbody,
-  .end-shift-table tr { display: block; width: 100%; }
-  .end-shift-table tr {
-    background: var(--bg2);
-    border: 1px solid var(--bdr);
-    border-radius: var(--rm);
-    margin-bottom: 8px;
-    padding: 10px 12px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 4px 8px;
-    align-items: center;
-  }
-  .end-shift-table td {
-    padding: 2px 0;
-    border-bottom: none !important;
-    font-size: 13px;
-    display: block;
-  }
-  /* Item name spans full width */
-  .end-shift-table td:first-child {
-    grid-column: 1 / -1;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--txt);
-    margin-bottom: 4px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--bdr) !important;
-  }
-  .end-shift-table td[style*="text-align:center"] {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--txt3);
-    text-align: left !important;
-  }
-  .end-shift-table td[style*="text-align:center"]::before {
-    font-size: 10px;
-    color: var(--txt3);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    white-space: nowrap;
-  }
-  .est-return-input { width: 64px; }
-  
-  /* Topbar: tighter */
-  .topbar { padding: 9px 12px; gap: 8px; }
-  .topbar-title { font-size: 14px; }
-  
-  /* Content: breathing room above bottom nav */
-  .content { padding: 12px 12px 80px; }
-  
-  /* Dashboard stat cards: slightly bigger font */
-  .stat-val { font-size: 20px; }
-  .stat-lbl { font-size: 10px; }
-  
-  /* Quick grid cards */
-  .quick-ico { font-size: 20px; }
-  .quick-title { font-size: 13px; }
-  .quick-sub { font-size: 11px; }
-  
-  /* Inventory item: wrap meta pills */
-  .inv-meta { gap: 5px; }
-  .inv-meta-pill { font-size: 10px; padding: 2px 7px; }
-  
-  /* Ledger table: make scrollable */
-  .ledger-table-wrap { font-size: 12px; }
-  .ledger-table th { font-size: 9px; padding: 8px 8px; }
-  .ledger-table td { padding: 8px 8px; font-size: 12px; white-space: nowrap; }
-  
-  /* Settings: single column thresholds */
-  #page-settings [style*="grid-template-columns:1fr 1fr"] {
-    display: flex !important;
-    flex-direction: column !important;
-  }
-  
-  /* Shift start card */
-  .shift-start-card { padding: 20px 16px; }
-  
-  /* Performance metrics: 2 cols */
-  .psc-metrics { grid-template-columns: repeat(2,1fr); }
-  
-  /* Bottom nav: slightly larger touch area */
-  .mobile-bottom-nav { height: 62px; }
-  .mbn-item { font-size: 9px; gap: 3px; }
-  .mbn-icon { font-size: 22px; }
-  
-  /* Alerts RST: fully stacked */
-  .rst-item {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .rst-target-wrap, .rst-pct-wrap {
-    align-items: flex-start;
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
-  }
-  .rst-input, .rst-pct-input { width: 80px; }
-  
-  /* Shift hdr */
-  .shift-hdr { gap: 8px; }
-  .shift-hdr-timer { font-size: 12px; }
-  
-  /* Modal: full-screen-ish on phone */
-  .modal { padding: 18px 16px; }
-  .modal-title { font-size: 14px; }
-  .field-input { font-size: 16px; }
-  
-  /* Del record chips: wrap nicely */
-  .del-rec-chips { gap: 4px; }
-  .del-chip { font-size: 10px; }
-  
-  /* notif toast: above bottom nav */
-  .notif-toast-wrap { bottom: 70px; }
-}
-
-/* ── Safe area for notched phones (iPhone X+) ── */
-@supports(padding-bottom: env(safe-area-inset-bottom)){
-  .mobile-bottom-nav {
-    padding-bottom: env(safe-area-inset-bottom);
-    height: calc(62px + env(safe-area-inset-bottom));
-  }
-  .content { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
-}
 </style>
-<style>@keyframes pinShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}</style></head>
+</head>
 <body>
 <div class="app-shell">
 
@@ -937,18 +714,18 @@ input[type="email"], input[type="password"], select, textarea {
     </div>
   </div>
   <nav class="sidebar-nav">
-    <div class="nav-item active" id="nav-dashboard" onclick="showPage(&#39;dashboard&#39;,this)"><span class="nav-icon">⊞</span><span>Dashboard</span></div>
-    <div class="nav-item" id="nav-inventory" onclick="showPage(&#39;inventory&#39;,this)"><span class="nav-icon">📦</span><span>Inventory</span></div>
-    <div class="nav-item" id="nav-deliveries" onclick="showPage(&#39;deliveries&#39;,this)"><span class="nav-icon">🚚</span><span>Deliveries</span></div>
-    <div class="nav-item" id="nav-shifts" onclick="showPage(&#39;shifts&#39;,this)"><span class="nav-icon">▶</span><span>Shifts</span></div>
+    <div class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard',this)"><span class="nav-icon">⊞</span><span>Dashboard</span></div>
+    <div class="nav-item" id="nav-inventory" onclick="showPage('inventory',this)"><span class="nav-icon">📦</span><span>Inventory</span></div>
+    <div class="nav-item" id="nav-deliveries" onclick="showPage('deliveries',this)"><span class="nav-icon">🚚</span><span>Deliveries</span></div>
+    <div class="nav-item" id="nav-shifts" onclick="showPage('shifts',this)"><span class="nav-icon">▶</span><span>Shifts</span></div>
     <div class="sidebar-divider"></div>
-    <div class="nav-item" id="nav-ledger" onclick="showPage(&#39;ledger&#39;,this)"><span class="nav-icon">📋</span><span>Ledger</span></div>
-    <div class="nav-item" id="nav-reports" onclick="showPage(&#39;reports&#39;,this)"><span class="nav-icon">📊</span><span>Reports</span></div>
-    <div class="nav-item" id="nav-history" onclick="showPage(&#39;history&#39;,this)"><span class="nav-icon">🕐</span><span>History</span></div>
-    <div class="nav-item" id="nav-performance" onclick="showPage(&#39;performance&#39;,this)"><span class="nav-icon">🏆</span><span>Staff Perf</span><span id="perf-nav-flag" style="display:none" class="nav-flag-dot"></span></div>
+    <div class="nav-item" id="nav-ledger" onclick="showPage('ledger',this)"><span class="nav-icon">📋</span><span>Ledger</span></div>
+    <div class="nav-item" id="nav-reports" onclick="showPage('reports',this)"><span class="nav-icon">📊</span><span>Reports</span></div>
+    <div class="nav-item" id="nav-history" onclick="showPage('history',this)"><span class="nav-icon">🕐</span><span>History</span></div>
+    <div class="nav-item" id="nav-performance" onclick="showPage('performance',this)"><span class="nav-icon">🏆</span><span>Staff Perf</span><span id="perf-nav-flag" style="display:none" class="nav-flag-dot"></span></div>
     <div class="sidebar-divider"></div>
-    <div class="nav-item" id="nav-alerts" onclick="showPage(&#39;alerts&#39;,this)"><span class="nav-icon">🔔</span><span>Alerts</span><span id="alerts-nav-badge" style="display: inline-block; margin-left: auto; background: var(--red); color: rgb(255, 255, 255); font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 7px; min-width: 18px; text-align: center;">10</span></div>
-    <div class="nav-item" id="nav-settings" onclick="showPage(&#39;settings&#39;,this)"><span class="nav-icon">⚙</span><span>Settings</span></div>
+    <div class="nav-item" id="nav-alerts" onclick="showPage('alerts',this)"><span class="nav-icon">🔔</span><span>Alerts</span><span id="alerts-nav-badge" style="display:none;margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;border-radius:999px;padding:1px 7px;min-width:18px;text-align:center"></span></div>
+    <div class="nav-item" id="nav-settings" onclick="showPage('settings',this)"><span class="nav-icon">⚙</span><span>Settings</span></div>
   </nav>
 </aside>
 
@@ -960,11 +737,13 @@ input[type="email"], input[type="password"], select, textarea {
       <span class="topbar-title" id="topbar-title">Dashboard</span>
       <span class="topbar-sub" id="topbar-sub">CartShift Inventory Pro</span>
     </div>
-    <button class="notif-bell-btn" id="notif-bell" onclick="toggleNotifDrawer()" title="Notifications" aria-label="Notifications">
-      🔔
-      <span class="notif-bell-badge" id="notif-bell-badge" style="display:none">0</span>
-    </button>
-    <div class="topbar-right" id="topbar-right"></div>
+    <div class="topbar-right" id="topbar-right">
+      <button class="notif-bell-btn" id="notif-bell-btn" onclick="toggleNotifDrawer()" title="Notifications">
+        🔔
+        <span class="notif-bell-badge" id="notif-bell-badge" style="display:none">0</span>
+      </button>
+      <span class="topbar-badge">v13.1</span>
+    </div>
   </div>
 
   <div class="content">
@@ -972,94 +751,7 @@ input[type="email"], input[type="password"], select, textarea {
     <!-- ═══ DASHBOARD ═══ -->
     <div class="page active" id="page-dashboard">
       <div id="dash-expiry-alert"></div>
-      <div id="dash-out-of-stock"><div class="stock-alert-section">
-    <div class="stock-alert-header oos">
-      <span class="sah-icon">⊗</span>
-      <span class="sah-title oos">Out of Stock — Needs Immediate Restock</span>
-      <span class="sah-count oos">10</span>
-    </div>
-    <div class="stock-alert-rows"><div class="sar-item">
-      <div class="sar-dot" style="background:var(--orange)"></div>
-      <div class="sar-name">TRy</div>
-      <div class="sar-meta">Target: 5 · 0% left</div>
-      <div class="sar-bar-wrap">
-        <div class="sar-bar-bg"><div class="sar-bar-fill" style="width:0%;background:var(--red)"></div></div>
-      </div>
-      <div class="sar-badge oos">0 packs</div>
-    </div><div class="sar-item">
-      <div class="sar-dot" style="background:var(--orange)"></div>
-      <div class="sar-name">Chicken Siomai</div>
-      <div class="sar-meta">Target: 2 · 0% left</div>
-      <div class="sar-bar-wrap">
-        <div class="sar-bar-bg"><div class="sar-bar-fill" style="width:0%;background:var(--red)"></div></div>
-      </div>
-      <div class="sar-badge oos">0 packs</div>
-    </div><div class="sar-item">
-      <div class="sar-dot" style="background:var(--blue)"></div>
-      <div class="sar-name">Pork Siomai</div>
-      <div class="sar-meta">Target: 2 · 0% left</div>
-      <div class="sar-bar-wrap">
-        <div class="sar-bar-bg"><div class="sar-bar-fill" style="width:0%;background:var(--red)"></div></div>
-      </div>
-      <div class="sar-badge oos">0 packs</div>
-    </div><div class="sar-item">
-      <div class="sar-dot" style="background:var(--green)"></div>
-      <div class="sar-name">Japanese Siomai</div>
-      <div class="sar-meta">Target: 2 · 0% left</div>
-      <div class="sar-bar-wrap">
-        <div class="sar-bar-bg"><div class="sar-bar-fill" style="width:0%;background:var(--red)"></div></div>
-      </div>
-      <div class="sar-badge oos">0 packs</div>
-    </div><div class="sar-item">
-      <div class="sar-dot" style="background:var(--purple)"></div>
-      <div class="sar-name">Beef Siomai</div>
-      <div class="sar-meta">Target: 2 · 0% left</div>
-      <div class="sar-bar-wrap">
-        <div class="sar-bar-bg"><div class="sar-bar-fill" style="width:0%;background:var(--red)"></div></div>
-      </div>
-      <div class="sar-badge oos">0 packs</div>
-    </div><div class="sar-item">
-      <div class="sar-dot" style="background:var(--red)"></div>
-      <div class="sar-name">Coke</div>
-      <div class="sar-meta">Target: 5 · 0% left</div>
-      <div class="sar-bar-wrap">
-        <div class="sar-bar-bg"><div class="sar-bar-fill" style="width:0%;background:var(--red)"></div></div>
-      </div>
-      <div class="sar-badge oos">0 pcs</div>
-    </div><div class="sar-item">
-      <div class="sar-dot" style="background:var(--gold)"></div>
-      <div class="sar-name">Orange Juice</div>
-      <div class="sar-meta">Target: 5 · 0% left</div>
-      <div class="sar-bar-wrap">
-        <div class="sar-bar-bg"><div class="sar-bar-fill" style="width:0%;background:var(--red)"></div></div>
-      </div>
-      <div class="sar-badge oos">0 pcs</div>
-    </div><div class="sar-item">
-      <div class="sar-dot" style="background:var(--blue)"></div>
-      <div class="sar-name">Sprite</div>
-      <div class="sar-meta">Target: 5 · 0% left</div>
-      <div class="sar-bar-wrap">
-        <div class="sar-bar-bg"><div class="sar-bar-fill" style="width:0%;background:var(--red)"></div></div>
-      </div>
-      <div class="sar-badge oos">0 pcs</div>
-    </div><div class="sar-item">
-      <div class="sar-dot" style="background:var(--green)"></div>
-      <div class="sar-name">Rice</div>
-      <div class="sar-meta">Target: 10 · 0% left</div>
-      <div class="sar-bar-wrap">
-        <div class="sar-bar-bg"><div class="sar-bar-fill" style="width:0%;background:var(--red)"></div></div>
-      </div>
-      <div class="sar-badge oos">0 portions</div>
-    </div><div class="sar-item">
-      <div class="sar-dot" style="background:var(--txt2)"></div>
-      <div class="sar-name">Silver Packs</div>
-      <div class="sar-meta">Target: 10 · 0% left</div>
-      <div class="sar-bar-wrap">
-        <div class="sar-bar-bg"><div class="sar-bar-fill" style="width:0%;background:var(--red)"></div></div>
-      </div>
-      <div class="sar-badge oos">0 pcs</div>
-    </div></div>
-  </div></div>
+      <div id="dash-out-of-stock"></div>
       <div id="dash-suspicious-v11" style="display:none"></div>
       <div id="notif-perm-banner-dash" style="display:none"></div>
       <div class="banner">
@@ -1078,10 +770,10 @@ input[type="email"], input[type="password"], select, textarea {
       </div>
       <div class="sec-label">Quick Actions</div>
       <div class="quick-grid">
-        <div class="quick-card qc-orange" onclick="showPage(&#39;inventory&#39;,document.getElementById(&#39;nav-inventory&#39;))"><span class="quick-ico">📦</span><div class="quick-title">Master Inventory</div><div class="quick-sub">View all stock levels</div></div>
-        <div class="quick-card qc-green" onclick="showPage(&#39;deliveries&#39;,document.getElementById(&#39;nav-deliveries&#39;))"><span class="quick-ico">🚛</span><div class="quick-title">Record Delivery</div><div class="quick-sub">Add vendor delivery</div></div>
-        <div class="quick-card qc-red" onclick="showPage(&#39;shifts&#39;,document.getElementById(&#39;nav-shifts&#39;))"><span class="quick-ico">🏁</span><div class="quick-title">End Shift</div><div class="quick-sub">Count returns &amp; finish</div></div>
-        <div class="quick-card qc-blue" onclick="showPage(&#39;ledger&#39;,document.getElementById(&#39;nav-ledger&#39;))"><span class="quick-ico">📋</span><div class="quick-title">Audit Ledger</div><div class="quick-sub">Transaction history</div></div>
+        <div class="quick-card qc-orange" onclick="showPage('inventory',document.getElementById('nav-inventory'))"><span class="quick-ico">📦</span><div class="quick-title">Master Inventory</div><div class="quick-sub">View all stock levels</div></div>
+        <div class="quick-card qc-green" onclick="showPage('deliveries',document.getElementById('nav-deliveries'))"><span class="quick-ico">🚛</span><div class="quick-title">Record Delivery</div><div class="quick-sub">Add vendor delivery</div></div>
+        <div class="quick-card qc-red" onclick="showPage('shifts',document.getElementById('nav-shifts'))"><span class="quick-ico">🏁</span><div class="quick-title">End Shift</div><div class="quick-sub">Count returns &amp; finish</div></div>
+        <div class="quick-card qc-blue" onclick="showPage('ledger',document.getElementById('nav-ledger'))"><span class="quick-ico">📋</span><div class="quick-title">Audit Ledger</div><div class="quick-sub">Transaction history</div></div>
       </div>
       <div class="sec-label">Low Stock Items</div>
       <div id="dash-low-stock" class="low-list"></div>
@@ -1091,12 +783,12 @@ input[type="email"], input[type="password"], select, textarea {
     <div class="page" id="page-inventory">
       <div id="inv-out-alert"></div>
       <div class="inv-filters" id="inv-filters">
-        <div class="filter-chip active" onclick="setFilter(&#39;All&#39;,this)">All</div>
-        <div class="filter-chip" onclick="setFilter(&#39;Siomai&#39;,this)">Siomai</div>
-        <div class="filter-chip" onclick="setFilter(&#39;Drinks&#39;,this)">Drinks</div>
-        <div class="filter-chip" onclick="setFilter(&#39;Rice&#39;,this)">Rice</div>
-        <div class="filter-chip" onclick="setFilter(&#39;Supplies&#39;,this)">Supplies</div>
-        <div class="filter-chip" onclick="setFilter(&#39;Custom&#39;,this)">Custom</div>
+        <div class="filter-chip active" onclick="setFilter('All',this)">All</div>
+        <div class="filter-chip" onclick="setFilter('Siomai',this)">Siomai</div>
+        <div class="filter-chip" onclick="setFilter('Drinks',this)">Drinks</div>
+        <div class="filter-chip" onclick="setFilter('Rice',this)">Rice</div>
+        <div class="filter-chip" onclick="setFilter('Supplies',this)">Supplies</div>
+        <div class="filter-chip" onclick="setFilter('Custom',this)">Custom</div>
       </div>
       <div id="inv-list"></div>
     </div>
@@ -1114,9 +806,9 @@ input[type="email"], input[type="password"], select, textarea {
       <!-- FORM VIEW (hidden by default) -->
       <div id="del-form-view" style="display:none;max-width:600px">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px">
-          <button onclick="hideDeliveryForm()" style="background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--rm);padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif">← Back</button>
+          <button onclick="hideDeliveryForm()" style="background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--rm);padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">← Back</button>
           <div>
-            <div style="font-family:&#39;Unbounded&#39;,sans-serif;font-size:16px;font-weight:700;color:var(--txt)">Record Delivery</div>
+            <div style="font-family:'Unbounded',sans-serif;font-size:16px;font-weight:700;color:var(--txt)">Record Delivery</div>
             <div style="font-size:12px;color:var(--txt3);margin-top:2px">Add a vendor delivery to inventory</div>
           </div>
         </div>
@@ -1138,7 +830,7 @@ input[type="email"], input[type="password"], select, textarea {
         <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:20px;margin-bottom:12px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
             <div style="font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase">ITEMS RECEIVED</div>
-            <button onclick="addDeliveryLine()" style="background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--rs);padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif;display:flex;align-items:center;gap:5px">＋ Add Line</button>
+            <button onclick="addDeliveryLine()" style="background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--rs);padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px">＋ Add Line</button>
           </div>
           <div id="del-lines"></div>
         </div>
@@ -1146,7 +838,7 @@ input[type="email"], input[type="password"], select, textarea {
         <!-- Total -->
         <div style="background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rm);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
           <span style="font-size:13px;color:var(--txt2)">Total Delivery Cost</span>
-          <span style="font-size:22px;font-weight:700;font-family:&#39;DM Mono&#39;,monospace;color:var(--gold)" id="del-total">₱0</span>
+          <span style="font-size:22px;font-weight:700;font-family:'DM Mono',monospace;color:var(--gold)" id="del-total">₱0</span>
         </div>
 
         <!-- Notes -->
@@ -1155,7 +847,7 @@ input[type="email"], input[type="password"], select, textarea {
           <input class="field-input" id="del-notes" type="text" placeholder="Any delivery notes…">
         </div>
 
-        <button onclick="saveDelivery()" style="width:100%;background:var(--orange);color:#fff;border:none;border-radius:var(--rm);padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif;transition:opacity .14s" onmouseover="this.style.opacity=&#39;.88&#39;" onmouseout="this.style.opacity=&#39;1&#39;">✓ Save Delivery &amp; Update Inventory</button>
+        <button onclick="saveDelivery()" style="width:100%;background:var(--orange);color:#fff;border:none;border-radius:var(--rm);padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .14s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">✓ Save Delivery &amp; Update Inventory</button>
         <div id="del-save-error" style="font-size:12px;color:var(--red);text-align:center;margin-top:8px;display:none"></div>
       </div>
     </div>
@@ -1191,7 +883,7 @@ input[type="email"], input[type="password"], select, textarea {
               <div style="margin-bottom:12px">
                 <div class="batch-lbl" style="margin-bottom:5px">STAFF NAME</div>
                 <input class="shift-staff-input" id="shift-staff-name" type="text" placeholder="e.g. Maria" autocomplete="off" list="staff-name-datalist">
-                <datalist id="staff-name-datalist"><option value="TEST 1"></option></datalist>
+                <datalist id="staff-name-datalist"></datalist>
               </div>
               <div style="margin-bottom:20px">
                 <div class="batch-lbl" style="margin-bottom:5px">OPENING CASH (OPTIONAL)</div>
@@ -1219,7 +911,7 @@ input[type="email"], input[type="password"], select, textarea {
                 <div id="cart-load-items"></div>
               </div>
               <div style="display:flex;gap:8px;margin-top:14px">
-                <button onclick="goBackToStep1()" style="background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--rm);padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif">← Back</button>
+                <button onclick="goBackToStep1()" style="background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--rm);padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">← Back</button>
                 <button class="btn-shift-start" style="flex:1" onclick="startShift()">▶ Start Shift</button>
               </div>
             </div>
@@ -1248,6 +940,13 @@ input[type="email"], input[type="password"], select, textarea {
         <div class="sec-label">Add More / Log Waste</div>
         <div class="shift-item-grid" id="shift-item-grid"></div>
 
+        <!-- ── EXPENSES (v13.1) ── -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 6px;">
+          <div class="sec-label" style="margin:0;flex:1">Expenses</div>
+          <button class="btn-add-expense" onclick="openExpenseModal()">＋ Add Expense</button>
+        </div>
+        <div id="shift-expense-list"></div>
+
         <div class="sec-label">Shift Log</div>
         <div class="shift-log-preview" id="shift-log-preview">
           <div style="font-size:12px;color:var(--txt3);text-align:center;padding:10px 0">No actions yet this shift.</div>
@@ -1257,15 +956,15 @@ input[type="email"], input[type="password"], select, textarea {
       <!-- ══ End shift: improved returns table ══ -->
       <div id="shift-end-view" style="display:none;max-width:640px">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-          <button onclick="cancelEndShift()" style="background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--rm);padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif">← Back</button>
+          <button onclick="cancelEndShift()" style="background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--rm);padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">← Back</button>
           <div>
-            <div style="font-family:&#39;Unbounded&#39;,sans-serif;font-size:16px;font-weight:700;color:var(--txt)">🏁 End Shift — Count Returns</div>
+            <div style="font-family:'Unbounded',sans-serif;font-size:16px;font-weight:700;color:var(--txt)">🏁 End Shift — Count Returns</div>
             <div style="font-size:12px;color:var(--txt3);margin-top:2px">Enter how many came back unsold. Sold = Taken − Returned.</div>
           </div>
         </div>
 
         <!-- Returns table -->
-        <div class="shift-end-table-wrap" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;margin-bottom:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;">
+        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;margin-bottom:12px">
           <div id="shift-return-list"></div>
         </div>
 
@@ -1290,7 +989,7 @@ input[type="email"], input[type="password"], select, textarea {
           <div class="cash-recon-row" style="margin-bottom:0">
             <span class="cash-recon-lbl">Actual Cash Collected</span>
             <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-size:13px;color:var(--gold);font-family:&#39;DM Mono&#39;,monospace">₱</span>
+              <span style="font-size:13px;color:var(--gold);font-family:'DM Mono',monospace">₱</span>
               <input class="cash-recon-input" id="recon-actual" type="number" min="0" step="0.01" placeholder="0.00" oninput="updateReconDiff()">
               <span class="cash-recon-diff exact" id="recon-diff" style="display:none"></span>
             </div>
@@ -1300,11 +999,42 @@ input[type="email"], input[type="password"], select, textarea {
         <!-- Shift notes -->
         <div id="shift-end-notes-wrap" style="margin-bottom:12px;display:none">
           <div style="font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">📝 Shift Notes / Remarks</div>
-          <textarea id="shift-end-notes" placeholder="Optional: anything notable about this shift? (weather, issues, early close…)" style="width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rm);padding:10px 12px;font-size:13px;color:var(--txt);font-family:&#39;DM Sans&#39;,sans-serif;resize:vertical;min-height:72px;line-height:1.5" onfocus="this.style.borderColor=&#39;var(--orange)&#39;" onblur="this.style.borderColor=&#39;var(--bdr2)&#39;"></textarea>
+          <textarea id="shift-end-notes" placeholder="Optional: anything notable about this shift? (weather, issues, early close…)" style="width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rm);padding:10px 12px;font-size:13px;color:var(--txt);font-family:'DM Sans',sans-serif;resize:vertical;min-height:72px;line-height:1.5" onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--bdr2)'"></textarea>
         </div>
         <button class="btn-confirm-end" onclick="confirmEndShift()">✓ Confirm End Shift &amp; Save</button>
       </div>
 
+    </div>
+
+    <!-- ══ Expense Modal (v13.1) ══ -->
+    <div class="modal-overlay" id="expense-modal" onclick="closeExpenseModalOnBg(event)">
+      <div class="modal" style="max-width:420px">
+        <div class="modal-title">💸 Add Expense</div>
+        <div class="field-group">
+          <label class="field-lbl">CATEGORY</label>
+          <div class="cat-select-grid" id="exp-cat-grid">
+            <div class="cat-option selected" data-cat="Supplies" onclick="selectExpenseCat(this)">🧴 Supplies</div>
+            <div class="cat-option" data-cat="Transport" onclick="selectExpenseCat(this)">🚗 Transport</div>
+            <div class="cat-option" data-cat="Packaging" onclick="selectExpenseCat(this)">📦 Packaging</div>
+            <div class="cat-option" data-cat="Misc" onclick="selectExpenseCat(this)">📌 Misc</div>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-lbl">AMOUNT (₱)</label>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:14px;color:var(--gold);font-family:'DM Mono',monospace;font-weight:700">₱</span>
+            <input class="field-input" id="exp-amount" type="number" min="0" step="0.01" placeholder="0.00" style="flex:1">
+          </div>
+        </div>
+        <div class="field-group" style="margin-bottom:0">
+          <label class="field-lbl">NOTE (OPTIONAL)</label>
+          <input class="field-input" id="exp-note" type="text" placeholder="What was this for?">
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel" onclick="closeExpenseModal()">Cancel</button>
+          <button class="btn-save" onclick="saveExpense()">Save Expense</button>
+        </div>
+      </div>
     </div>
 
     <!-- ══ Shift Summary Modal ══ -->
@@ -1323,9 +1053,10 @@ input[type="email"], input[type="password"], select, textarea {
           <thead><tr><th>Item</th><th>Taken</th><th>Sold</th><th>Returned</th><th>Waste</th><th>Pcs Left</th><th>Revenue</th></tr></thead>
           <tbody id="ssb-tbody"></tbody>
         </table>
+        <div id="ssb-expense-breakdown" style="display:none"></div>
         <div id="ssb-recon-note" style="font-size:12px;margin-bottom:14px;padding:10px 12px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rs);color:var(--txt2)"></div>
         <div id="ssb-shift-notes" style="font-size:12px;margin-bottom:14px;padding:10px 12px;background:var(--blue-l);border:1px solid var(--blue-b);border-radius:var(--rs);color:var(--blue);display:none"></div>
-        <button class="ssb-close" onclick="closeShiftSummary()">✓ Close &amp; Archive Shift</button>
+        <button class="ssb-close" onclick="closeShiftSummary()">✓ Close & Archive Shift</button>
       </div>
     </div>
     <div class="page" id="page-ledger">
@@ -1338,23 +1069,23 @@ input[type="email"], input[type="password"], select, textarea {
       <div class="ledger-toolbar" id="ledger-toolbar">
         <input class="ledger-search" id="ledger-search" type="text" placeholder="🔍  Search item or vendor…" oninput="filterLedger()">
         <input class="ledger-date" id="ledger-from" type="date" title="From date" onchange="filterLedger()">
-        <input class="ledger-date" id="ledger-to" type="date" title="To date" onchange="filterLedger()">
+        <input class="ledger-date" id="ledger-to"   type="date" title="To date"   onchange="filterLedger()">
         <button class="btn-print" onclick="clearLedgerDates()" title="Clear date filter">✕ Date</button>
       </div>
       <!-- Filter chips -->
       <div class="ledger-chips" id="ledger-chips">
-        <div class="filter-chip active" onclick="setLedgerFilter(&#39;All&#39;,this)">All</div>
-        <div class="filter-chip" onclick="setLedgerFilter(&#39;Delivery In&#39;,this)">Delivery In</div>
-        <div class="filter-chip" onclick="setLedgerFilter(&#39;Shift Out&#39;,this)">Shift Out</div>
-        <div class="filter-chip" onclick="setLedgerFilter(&#39;Shift Return&#39;,this)">Shift Return</div>
-        <div class="filter-chip" onclick="setLedgerFilter(&#39;Waste&#39;,this)">Waste</div>
-        <div class="filter-chip" onclick="setLedgerFilter(&#39;Batch Added&#39;,this)">Batch Added</div>
-        <div class="filter-chip" onclick="setLedgerFilter(&#39;Batch Deleted&#39;,this)">Batch Deleted</div>
-        <div class="filter-chip" onclick="setLedgerFilter(&#39;Item Added&#39;,this)">Item Added</div>
-        <div class="filter-chip" onclick="setLedgerFilter(&#39;Delivery Edited&#39;,this)">Delivery Edited</div>
-        <div class="filter-chip" onclick="setLedgerFilter(&#39;Delivery Deleted&#39;,this)">Delivery Deleted</div>
-        <div class="filter-chip" onclick="setLedgerFilter(&#39;Adjustment&#39;,this)">Adjustment</div>
-        <div class="filter-chip" onclick="setLedgerFilter(&#39;Manager Unlock&#39;,this)">Manager</div>
+        <div class="filter-chip active" onclick="setLedgerFilter('All',this)">All</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Delivery In',this)">Delivery In</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Shift Out',this)">Shift Out</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Shift Return',this)">Shift Return</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Waste',this)">Waste</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Batch Added',this)">Batch Added</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Batch Deleted',this)">Batch Deleted</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Item Added',this)">Item Added</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Delivery Edited',this)">Delivery Edited</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Delivery Deleted',this)">Delivery Deleted</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Adjustment',this)">Adjustment</div>
+        <div class="filter-chip" onclick="setLedgerFilter('Manager Unlock',this)">Manager</div>
       </div>
       <div class="ledger-count" id="ledger-count"></div>
       <!-- Table -->
@@ -1385,8 +1116,8 @@ input[type="email"], input[type="password"], select, textarea {
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px">
           <div class="rpt-section-title" style="margin-bottom:0;flex:1">Revenue Trend</div>
           <div style="display:flex;gap:6px">
-            <button id="trend-btn-weekly" onclick="setTrendPeriod(&#39;weekly&#39;)" class="filter-chip active" style="padding:4px 12px;font-size:11px">Weekly</button>
-            <button id="trend-btn-monthly" onclick="setTrendPeriod(&#39;monthly&#39;)" class="filter-chip" style="padding:4px 12px;font-size:11px">Monthly</button>
+            <button id="trend-btn-weekly"  onclick="setTrendPeriod('weekly')"  class="filter-chip active" style="padding:4px 12px;font-size:11px">Weekly</button>
+            <button id="trend-btn-monthly" onclick="setTrendPeriod('monthly')" class="filter-chip"        style="padding:4px 12px;font-size:11px">Monthly</button>
           </div>
         </div>
         <div id="rpt-trend-chart" style="overflow-x:auto;"></div>
@@ -1415,34 +1146,29 @@ input[type="email"], input[type="password"], select, textarea {
       <!-- Staff cards -->
       <div id="perf-staff-list"></div>
     </div>
-   <div class="page" id="page-settings">
-  <div style="max-width:480px">
-    <div style="background:var(--bg2);border:1px solid var(--red-b);border-radius:var(--r);padding:22px;margin-bottom:12px">
-      <div style="font-size:11px;font-weight:600;color:var(--red);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">🔒 Session</div>
-      <div style="font-size:13px;color:var(--txt2);margin-bottom:16px;line-height:1.6">You are currently logged in as <strong style="color:var(--orange)">shumaigosh</strong>. Click logout to return to the login screen.</div>
-      <button onclick="logout()" style="background:var(--red-l);border:1px solid var(--red-b);color:var(--red);border-radius:var(--rm);padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif;">🔒 Logout</button>
-    </div>
-    <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:22px;margin-bottom:12px">
-      <div style="font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">🔐 Manager PIN</div>
-      <div style="font-size:13px;color:var(--txt2);margin-bottom:16px;line-height:1.6">The manager PIN protects editing and deleting deliveries and inventory batches. Session stays unlocked for 3 minutes after entry.<br><br>Default PIN: <span style="font-family:&#39;DM Mono&#39;,monospace;color:var(--orange)">1234</span></div>
-      <button onclick="openChangePinFlow()" style="background: var(--orange-l); border: 1px solid var(--orange-b); color: var(--orange); border-radius: var(--rm); padding: 10px 18px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: &quot;DM Sans&quot;, sans-serif; transition: opacity 0.12s; opacity: 1;" onmouseover="this.style.opacity=&#39;.8&#39;" onmouseout="this.style.opacity=&#39;1&#39;">🔑 Change Manager PIN</button>
-    </div>
+    <div class="page" id="page-settings">
+      <div style="max-width:480px">
+        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:22px;margin-bottom:12px">
+          <div style="font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">🔐 Manager PIN</div>
+          <div style="font-size:13px;color:var(--txt2);margin-bottom:16px;line-height:1.6">The manager PIN protects editing and deleting deliveries and inventory batches. Session stays unlocked for 3 minutes after entry.<br><br>Default PIN: <span style="font-family:'DM Mono',monospace;color:var(--orange)">1234</span></div>
+          <button onclick="openChangePinFlow()" style="background:var(--orange-l);border:1px solid var(--orange-b);color:var(--orange);border-radius:var(--rm);padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .12s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">🔑 Change Manager PIN</button>
+        </div>
 
         <!-- ── NOTIFICATIONS (v12) ── -->
         <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:22px;margin-bottom:12px" id="notif-settings-section">
           <div style="font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">🔔 Push Notifications</div>
           <div style="font-size:13px;color:var(--txt2);margin-bottom:14px;line-height:1.6">Get notified about shift activity, stock alerts, and suspicious events. Works on Android Chrome and iOS Safari 16.4+ when added to your home screen.</div>
-          <div id="notif-perm-status" style="margin-bottom:14px"><div style="font-size:12px;color:var(--green);padding:8px 12px;background:var(--green-l);border:1px solid var(--green-b);border-radius:var(--rs)">✅ Push notifications are <strong>enabled</strong>. Works on Android Chrome and iOS (when added to home screen).</div></div>
+          <div id="notif-perm-status" style="margin-bottom:14px"></div>
           <div class="notif-setting-row">
             <div class="notif-setting-info">
               <div class="notif-setting-label">🏁 Shift End Summary</div>
-              <div class="notif-setting-sub">Notify when a shift is completed with revenue &amp; profit</div>
+              <div class="notif-setting-sub">Notify when a shift is completed with revenue & profit</div>
             </div>
             <label class="toggle-wrap"><input type="checkbox" id="ntog-shift-end" onchange="saveNotifSettings()"><span class="toggle-slider"></span></label>
           </div>
           <div class="notif-setting-row">
             <div class="notif-setting-info">
-              <div class="notif-setting-label">📦 Low Stock &amp; Out of Stock</div>
+              <div class="notif-setting-label">📦 Low Stock & Out of Stock</div>
               <div class="notif-setting-sub">Notify when an item hits its low threshold or runs out</div>
             </div>
             <label class="toggle-wrap"><input type="checkbox" id="ntog-stock" onchange="saveNotifSettings()"><span class="toggle-slider"></span></label>
@@ -1467,7 +1193,7 @@ input[type="email"], input[type="password"], select, textarea {
               <div class="notif-setting-sub">Warn after this many hours</div>
             </div>
             <div style="display:flex;align-items:center;gap:6px">
-              <input id="ntog-long-hours" type="number" min="1" max="24" value="8" class="field-input" style="width:60px;padding:6px 8px;font-size:14px;font-family:&#39;DM Mono&#39;,monospace;font-weight:700;color:var(--orange);text-align:center" oninput="saveNotifSettings()">
+              <input id="ntog-long-hours" type="number" min="1" max="24" value="8" class="field-input" style="width:60px;padding:6px 8px;font-size:14px;font-family:'DM Mono',monospace;font-weight:700;color:var(--orange);text-align:center" oninput="saveNotifSettings()">
               <span style="font-size:12px;color:var(--txt3)">hrs</span>
             </div>
           </div>
@@ -1479,7 +1205,7 @@ input[type="email"], input[type="password"], select, textarea {
           <div style="font-size:13px;color:var(--txt2);margin-bottom:16px;line-height:1.6">
             Get emailed when a shift ends, stock runs out, or suspicious activity is detected.<br><br>
             <strong style="color:var(--orange)">Setup (free, 3 steps):</strong><br>
-            1. Sign up at <a href="https://www.emailjs.com/" target="_blank" style="color:var(--blue)">emailjs.com</a> → get your <strong>Public Key</strong><br>
+            1. Sign up at <a href="https://www.emailjs.com" target="_blank" style="color:var(--blue)">emailjs.com</a> → get your <strong>Public Key</strong><br>
             2. Create an <strong>Email Service</strong> (connect Gmail) → copy the <strong>Service ID</strong><br>
             3. Create an <strong>Email Template</strong> using the variables below → copy the <strong>Template ID</strong><br><br>
             <span style="font-size:11px;color:var(--txt3)">Template variables you can use: <code style="background:var(--bg4);padding:2px 6px;border-radius:4px;color:var(--orange)">{{subject}}</code> <code style="background:var(--bg4);padding:2px 6px;border-radius:4px;color:var(--orange)">{{body}}</code> <code style="background:var(--bg4);padding:2px 6px;border-radius:4px;color:var(--orange)">{{to_email}}</code></span>
@@ -1503,7 +1229,7 @@ input[type="email"], input[type="password"], select, textarea {
           </div>
 
           <div style="display:flex;align-items:center;gap:10px;margin-top:4px;flex-wrap:wrap">
-            <button onclick="testEmailJS()" style="background:var(--blue-l);border:1px solid var(--blue-b);color:var(--blue);border-radius:var(--rm);padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif;transition:opacity .12s" onmouseover="this.style.opacity=&#39;.8&#39;" onmouseout="this.style.opacity=&#39;1&#39;">📨 Send Test Email</button>
+            <button onclick="testEmailJS()" style="background:var(--blue-l);border:1px solid var(--blue-b);color:var(--blue);border-radius:var(--rm);padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .12s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">📨 Send Test Email</button>
             <div id="ejs-test-status" style="font-size:12px;min-height:18px"></div>
           </div>
         </div>
@@ -1513,15 +1239,10 @@ input[type="email"], input[type="password"], select, textarea {
           <div style="font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">👥 Staff Registry</div>
           <div style="font-size:13px;color:var(--txt2);margin-bottom:16px;line-height:1.6">Add known staff names to the registry. Their names appear as suggestions when starting a shift, and their performance is tracked in the Staff Performance page.</div>
           <div style="display:flex;gap:8px;margin-bottom:12px">
-            <input id="staff-reg-input" class="field-input" type="text" placeholder="Staff name…" style="flex:1;padding:9px 12px;font-size:13px" onkeydown="if(event.key===&#39;Enter&#39;)addStaffToRegistry()">
-            <button onclick="addStaffToRegistry()" style="background:var(--orange);color:#fff;border:none;border-radius:var(--rm);padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif;white-space:nowrap">＋ Add</button>
+            <input id="staff-reg-input" class="field-input" type="text" placeholder="Staff name…" style="flex:1;padding:9px 12px;font-size:13px" onkeydown="if(event.key==='Enter')addStaffToRegistry()">
+            <button onclick="addStaffToRegistry()" style="background:var(--orange);color:#fff;border:none;border-radius:var(--rm);padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap">＋ Add</button>
           </div>
-          <div id="staff-registry-list">
-    <div class="staff-registry-item">
-      <div class="sri-name">TEST 1</div>
-      <div class="sri-shifts" id="sri-shifts-0">No shifts yet</div>
-      <button class="sri-del" onclick="removeStaffFromRegistry(0)" title="Remove">✕</button>
-    </div></div>
+          <div id="staff-registry-list"></div>
         </div>
 
         <!-- ── SUSPICIOUS ACTIVITY THRESHOLDS (v11) ── -->
@@ -1532,29 +1253,29 @@ input[type="email"], input[type="password"], select, textarea {
             <div>
               <div class="field-lbl">MAX WASTE % PER SHIFT</div>
               <div style="display:flex;align-items:center;gap:6px">
-                <input id="thresh-waste" type="number" min="0" max="100" step="1" class="field-input" style="padding:8px 10px;font-size:14px;font-family:&#39;DM Mono&#39;,monospace;font-weight:700;color:var(--gold);width:80px" oninput="saveThresholds()">
+                <input id="thresh-waste" type="number" min="0" max="100" step="1" class="field-input" style="padding:8px 10px;font-size:14px;font-family:'DM Mono',monospace;font-weight:700;color:var(--gold);width:80px" oninput="saveThresholds()">
                 <span style="font-size:13px;color:var(--txt3)">%</span>
               </div>
             </div>
             <div>
               <div class="field-lbl">MAX CASH SHORTAGE (₱)</div>
               <div style="display:flex;align-items:center;gap:6px">
-                <span style="font-size:13px;color:var(--gold);font-family:&#39;DM Mono&#39;,monospace">₱</span>
-                <input id="thresh-cash" type="number" min="0" step="1" class="field-input" style="padding:8px 10px;font-size:14px;font-family:&#39;DM Mono&#39;,monospace;font-weight:700;color:var(--gold);width:100px" oninput="saveThresholds()">
+                <span style="font-size:13px;color:var(--gold);font-family:'DM Mono',monospace">₱</span>
+                <input id="thresh-cash" type="number" min="0" step="1" class="field-input" style="padding:8px 10px;font-size:14px;font-family:'DM Mono',monospace;font-weight:700;color:var(--gold);width:100px" oninput="saveThresholds()">
               </div>
             </div>
             <div>
               <div class="field-lbl">MIN SELL-THROUGH % (WARN)</div>
               <div style="display:flex;align-items:center;gap:6px">
-                <input id="thresh-sellthrough" type="number" min="0" max="100" step="1" class="field-input" style="padding:8px 10px;font-size:14px;font-family:&#39;DM Mono&#39;,monospace;font-weight:700;color:var(--gold);width:80px" oninput="saveThresholds()">
+                <input id="thresh-sellthrough" type="number" min="0" max="100" step="1" class="field-input" style="padding:8px 10px;font-size:14px;font-family:'DM Mono',monospace;font-weight:700;color:var(--gold);width:80px" oninput="saveThresholds()">
                 <span style="font-size:13px;color:var(--txt3)">%</span>
               </div>
             </div>
             <div>
               <div class="field-lbl">MIN AVG REVENUE/SHIFT (₱)</div>
               <div style="display:flex;align-items:center;gap:6px">
-                <span style="font-size:13px;color:var(--gold);font-family:&#39;DM Mono&#39;,monospace">₱</span>
-                <input id="thresh-revenue" type="number" min="0" step="1" class="field-input" style="padding:8px 10px;font-size:14px;font-family:&#39;DM Mono&#39;,monospace;font-weight:700;color:var(--gold);width:100px" oninput="saveThresholds()">
+                <span style="font-size:13px;color:var(--gold);font-family:'DM Mono',monospace">₱</span>
+                <input id="thresh-revenue" type="number" min="0" step="1" class="field-input" style="padding:8px 10px;font-size:14px;font-family:'DM Mono',monospace;font-weight:700;color:var(--gold);width:100px" oninput="saveThresholds()">
               </div>
             </div>
           </div>
@@ -1563,11 +1284,11 @@ input[type="email"], input[type="password"], select, textarea {
 
         <!-- ── BACKUP & RESTORE ── -->
         <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:22px;margin-bottom:12px">
-          <div style="font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">💾 Data Backup &amp; Restore</div>
+          <div style="font-size:11px;font-weight:600;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">💾 Data Backup & Restore</div>
           <div style="font-size:13px;color:var(--txt2);margin-bottom:16px;line-height:1.6">Export a full backup of all your inventory, deliveries, shifts, and ledger. Import it anytime to restore — even on a different device or after a browser reset.<br><br><span style="color:var(--orange);font-weight:700">Tip:</span> Back up after every shift. Save the file to Google Drive or send via Viber for safekeeping.</div>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button onclick="exportBackup()" style="background:var(--green-l);border:1px solid var(--green-b);color:var(--green);border-radius:var(--rm);padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif;transition:opacity .12s" onmouseover="this.style.opacity=&#39;.8&#39;" onmouseout="this.style.opacity=&#39;1&#39;">⬇ Export Backup</button>
-            <button onclick="document.getElementById(&#39;import-file-input&#39;).click()" style="background:var(--blue-l);border:1px solid var(--blue-b);color:var(--blue);border-radius:var(--rm);padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif;transition:opacity .12s" onmouseover="this.style.opacity=&#39;.8&#39;" onmouseout="this.style.opacity=&#39;1&#39;">⬆ Import / Restore</button>
+            <button onclick="exportBackup()" style="background:var(--green-l);border:1px solid var(--green-b);color:var(--green);border-radius:var(--rm);padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .12s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">⬇ Export Backup</button>
+            <button onclick="document.getElementById('import-file-input').click()" style="background:var(--blue-l);border:1px solid var(--blue-b);color:var(--blue);border-radius:var(--rm);padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .12s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">⬆ Import / Restore</button>
             <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importBackup(this)">
           </div>
           <div id="backup-status" style="font-size:12px;margin-top:10px;min-height:18px;"></div>
@@ -1608,17 +1329,17 @@ input[type="email"], input[type="password"], select, textarea {
     </div>
     <div class="pin-error" id="pin-error"></div>
     <div class="pin-pad">
-      <button class="pin-key" onclick="pinPress(&#39;1&#39;)">1</button>
-      <button class="pin-key" onclick="pinPress(&#39;2&#39;)">2</button>
-      <button class="pin-key" onclick="pinPress(&#39;3&#39;)">3</button>
-      <button class="pin-key" onclick="pinPress(&#39;4&#39;)">4</button>
-      <button class="pin-key" onclick="pinPress(&#39;5&#39;)">5</button>
-      <button class="pin-key" onclick="pinPress(&#39;6&#39;)">6</button>
-      <button class="pin-key" onclick="pinPress(&#39;7&#39;)">7</button>
-      <button class="pin-key" onclick="pinPress(&#39;8&#39;)">8</button>
-      <button class="pin-key" onclick="pinPress(&#39;9&#39;)">9</button>
+      <button class="pin-key" onclick="pinPress('1')">1</button>
+      <button class="pin-key" onclick="pinPress('2')">2</button>
+      <button class="pin-key" onclick="pinPress('3')">3</button>
+      <button class="pin-key" onclick="pinPress('4')">4</button>
+      <button class="pin-key" onclick="pinPress('5')">5</button>
+      <button class="pin-key" onclick="pinPress('6')">6</button>
+      <button class="pin-key" onclick="pinPress('7')">7</button>
+      <button class="pin-key" onclick="pinPress('8')">8</button>
+      <button class="pin-key" onclick="pinPress('9')">9</button>
       <button class="pin-key del" onclick="pinClear()">✕ Clear</button>
-      <button class="pin-key" onclick="pinPress(&#39;0&#39;)">0</button>
+      <button class="pin-key" onclick="pinPress('0')">0</button>
       <button class="pin-key del" onclick="pinBackspace()">⌫</button>
     </div>
     <button class="pin-cancel" onclick="closePinModal()">Cancel</button>
@@ -1668,7 +1389,7 @@ input[type="email"], input[type="password"], select, textarea {
       </div>
     </div>
     <div id="modal-calc-preview" style="background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--txt2);display:none">
-      <span id="mc-cpp"></span> &nbsp;·&nbsp; <span id="mc-cpo"></span> &nbsp;·&nbsp; <span id="mc-profit" style="font-weight:700"></span>
+      <span id="mc-cpp"></span> &nbsp;&middot;&nbsp; <span id="mc-cpo"></span> &nbsp;&middot;&nbsp; <span id="mc-profit" style="font-weight:700"></span>
     </div>
     <div class="field-group">
       <label class="field-lbl">Low Stock Threshold</label>
@@ -1678,11 +1399,11 @@ input[type="email"], input[type="password"], select, textarea {
       <label class="field-lbl">Color Dot</label>
       <div class="color-grid" id="color-grid">
         <div class="color-swatch selected" data-color="orange" style="background:var(--orange)" onclick="selectColor(this)"></div>
-        <div class="color-swatch" data-color="blue" style="background:var(--blue)" onclick="selectColor(this)"></div>
-        <div class="color-swatch" data-color="green" style="background:var(--green)" onclick="selectColor(this)"></div>
+        <div class="color-swatch" data-color="blue"   style="background:var(--blue)"   onclick="selectColor(this)"></div>
+        <div class="color-swatch" data-color="green"  style="background:var(--green)"  onclick="selectColor(this)"></div>
         <div class="color-swatch" data-color="purple" style="background:var(--purple)" onclick="selectColor(this)"></div>
-        <div class="color-swatch" data-color="red" style="background:var(--red)" onclick="selectColor(this)"></div>
-        <div class="color-swatch" data-color="gold" style="background:var(--gold)" onclick="selectColor(this)"></div>
+        <div class="color-swatch" data-color="red"    style="background:var(--red)"    onclick="selectColor(this)"></div>
+        <div class="color-swatch" data-color="gold"   style="background:var(--gold)"   onclick="selectColor(this)"></div>
       </div>
     </div>
     <div class="modal-actions">
@@ -2054,6 +1775,7 @@ function startShift(){
     cartLoads:   [],  // items pre-loaded at start
     outs:        [],  // mid-shift additional outs
     wastes:      [],
+    expenses:    [],  // v13.1 expense tracking
   };
 
   // Process cart loads — deduct from inventory immediately
@@ -2181,6 +1903,7 @@ function renderShiftsPage(){
 
   // Shift log preview
   renderShiftLogPreview();
+  renderExpenseList();
 }
 
 function renderShiftLogPreview(){
@@ -2210,6 +1933,85 @@ function renderShiftLogPreview(){
       <span style="color:var(--txt3);font-size:11px">${fmtTime(e.ts)}</span>
     </div>`;
   }).join('');
+}
+
+// ─────────────────────────────────────
+//  EXPENSES (v13.1)
+// ─────────────────────────────────────
+let _selectedExpenseCat = 'Supplies';
+
+function openExpenseModal(){
+  if(!activeShift) return;
+  _selectedExpenseCat = 'Supplies';
+  document.querySelectorAll('#exp-cat-grid .cat-option').forEach(el=>{
+    el.classList.toggle('selected', el.dataset.cat === 'Supplies');
+  });
+  document.getElementById('exp-amount').value = '';
+  document.getElementById('exp-note').value   = '';
+  document.getElementById('expense-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('exp-amount').focus(), 180);
+}
+
+function closeExpenseModal(){
+  document.getElementById('expense-modal').classList.remove('open');
+}
+
+function closeExpenseModalOnBg(e){
+  if(e.target.id==='expense-modal') closeExpenseModal();
+}
+
+function selectExpenseCat(el){
+  document.querySelectorAll('#exp-cat-grid .cat-option').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  _selectedExpenseCat = el.dataset.cat;
+}
+
+function saveExpense(){
+  const amount = parseFloat(document.getElementById('exp-amount').value||'');
+  if(isNaN(amount)||amount<=0){ alert('Please enter a valid expense amount.'); return; }
+  const note = document.getElementById('exp-note').value.trim();
+  if(!activeShift.expenses) activeShift.expenses = [];
+  activeShift.expenses.push({
+    id:       'exp_'+Date.now(),
+    category: _selectedExpenseCat,
+    amount,
+    note,
+    ts:       new Date().toISOString(),
+  });
+  saveActiveShift();
+  closeExpenseModal();
+  renderExpenseList();
+}
+
+function deleteExpense(expId){
+  if(!activeShift||!activeShift.expenses) return;
+  activeShift.expenses = activeShift.expenses.filter(e=>e.id!==expId);
+  saveActiveShift();
+  renderExpenseList();
+}
+
+function renderExpenseList(){
+  const el = document.getElementById('shift-expense-list');
+  if(!el||!activeShift) return;
+  const expenses = activeShift.expenses || [];
+  if(!expenses.length){
+    el.innerHTML = `<div style="font-size:12px;color:var(--txt3);padding:8px 0">No expenses recorded yet.</div>`;
+    return;
+  }
+  const total = expenses.reduce((s,e)=>s+e.amount,0);
+  const catIcons={Supplies:'🧴',Transport:'🚗',Packaging:'📦',Misc:'📌'};
+  el.innerHTML = `<div class="expense-list">
+    ${expenses.map(e=>`<div class="expense-row">
+      <span class="expense-cat-badge">${catIcons[e.category]||'📌'} ${e.category}</span>
+      <span class="expense-note">${e.note||'—'}</span>
+      <span class="expense-amount">-₱${e.amount.toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+      <button class="expense-del" onclick="deleteExpense('${e.id}')" title="Remove expense">✕</button>
+    </div>`).join('')}
+  </div>
+  <div class="expense-total-bar">
+    <span class="expense-total-lbl">Total Expenses</span>
+    <span class="expense-total-val">-₱${total.toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+  </div>`;
 }
 
 // ─────────────────────────────────────
@@ -2501,21 +2303,35 @@ function confirmEndShift(){
   const wasteCost = activeShift.wastes.reduce((s,w)=>s+(w.cost||0),0);
   totalCogs += wasteCost;
 
+  // Sum all expenses recorded during this shift
+  const totalExpenses = (activeShift.expenses||[]).reduce((s,e)=>s+(e.amount||0),0);
+
   const actualCash = parseFloat(document.getElementById('recon-actual')?.value||'');
   const opening    = activeShift.openingCash || 0;
   const shiftNotes = (document.getElementById('shift-end-notes')?.value||'').trim();
 
+  // v13.4: compute cashDiff here — the only place where both actualCash and
+  // revenue are known simultaneously. Formula: Actual Cash − Expected Cash
+  // Expected = openingCash + revenue (cash that should be in the drawer)
+  const expectedCash = opening + totalRevenue;
+  const cashDiff     = isNaN(actualCash) ? null : actualCash - expectedCash;
+
   // Save completed shift
   const completed = {
     ...activeShift,
-    endedAt:    new Date().toISOString(),
-    returns:    returnsSummary,
-    revenue:    totalRevenue,
-    cogs:       totalCogs,
-    profit:     totalRevenue - totalCogs,
-    actualCash: isNaN(actualCash) ? null : actualCash,
-    openingCash: opening,
-    notes:      shiftNotes,
+    endedAt:      new Date().toISOString(),
+    returns:      returnsSummary,
+    revenue:      totalRevenue,
+    cogs:         totalCogs,
+    expenses:     activeShift.expenses||[],
+    expenseTotal: totalExpenses,
+    profit:       totalRevenue - totalCogs - totalExpenses,
+    actualCash:   isNaN(actualCash) ? null : actualCash,
+    openingCash:  opening,
+    notes:        shiftNotes,
+    // v13.4: cashDiff stored directly — no post-hoc patching needed
+    cashDiff:     cashDiff,
+    cashDiffTagged: true, // prevents v11 legacy patch from overwriting
   };
   shiftHistory.unshift(completed);
   saveShiftHistory();
@@ -2552,10 +2368,13 @@ function showShiftSummaryModal(sh, actualCash, opening){
 
   // Stats
   const totalSold = (sh.returns||[]).reduce((s,r)=>s+r.soldQty,0);
+  const expTotal  = sh.expenseTotal || 0;
+  const fmt = n => n.toLocaleString('en-PH',{maximumFractionDigits:0});
   document.getElementById('ssb-stats').innerHTML = `
-    <div class="ssb-stat"><div class="ssb-stat-lbl">Revenue</div><div class="ssb-stat-val c-green">₱${(sh.revenue||0).toLocaleString('en-PH',{maximumFractionDigits:0})}</div></div>
-    <div class="ssb-stat"><div class="ssb-stat-lbl">Profit</div><div class="ssb-stat-val c-gold">₱${(sh.profit||0).toLocaleString('en-PH',{maximumFractionDigits:0})}</div></div>
-    <div class="ssb-stat"><div class="ssb-stat-lbl">Items Sold</div><div class="ssb-stat-val c-orange">${totalSold}</div></div>`;
+    <div class="ssb-stat"><div class="ssb-stat-lbl">Revenue</div><div class="ssb-stat-val c-green">₱${fmt(sh.revenue||0)}</div></div>
+    <div class="ssb-stat"><div class="ssb-stat-lbl">COGS</div><div class="ssb-stat-val c-red">₱${fmt(sh.cogs||0)}</div></div>
+    <div class="ssb-stat"><div class="ssb-stat-lbl">Expenses</div><div class="ssb-stat-val c-orange">₱${fmt(expTotal)}</div></div>
+    <div class="ssb-stat"><div class="ssb-stat-lbl">Net Profit</div><div class="ssb-stat-val ${(sh.profit||0)>=0?'c-gold':'c-red'}">₱${fmt(sh.profit||0)}</div></div>`;
 
   // Breakdown table
   document.getElementById('ssb-tbody').innerHTML = (sh.returns||[]).map(r=>`
@@ -2574,6 +2393,30 @@ function showShiftSummaryModal(sh, actualCash, opening){
   if(notesNoteEl){
     if(sh.notes){ notesNoteEl.textContent = '📝 Notes: '+sh.notes; notesNoteEl.style.display='block'; }
     else { notesNoteEl.style.display='none'; }
+  }
+
+  // Expense breakdown (v13.3)
+  const expBreakdownEl = document.getElementById('ssb-expense-breakdown');
+  if(expBreakdownEl){
+    const exps = sh.expenses||[];
+    if(exps.length){
+      expBreakdownEl.innerHTML = `
+        <div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:8px">Expenses (${exps.length})</div>
+        <div style="background:var(--bg3);border:1px solid var(--orange-b);border-radius:var(--rm);overflow:hidden;margin-bottom:14px">
+          ${exps.map(e=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bdr);font-size:12px">
+            <span style="flex:1;color:var(--txt)">${e.label||e.note||'Expense'}</span>
+            <span style="font-family:'DM Mono',monospace;font-weight:700;color:var(--orange)">₱${(e.amount||0).toLocaleString('en-PH',{maximumFractionDigits:2,minimumFractionDigits:2})}</span>
+          </div>`).join('')}
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:12px;background:var(--orange-l)">
+            <span style="flex:1;color:var(--txt2);font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:10px">Total Expenses</span>
+            <span style="font-family:'DM Mono',monospace;font-weight:700;color:var(--orange)">₱${expTotal.toLocaleString('en-PH',{maximumFractionDigits:2,minimumFractionDigits:2})}</span>
+          </div>
+        </div>`;
+      expBreakdownEl.style.display='block';
+    } else {
+      expBreakdownEl.innerHTML='';
+      expBreakdownEl.style.display='none';
+    }
   }
 
   // Cash recon note
@@ -2629,13 +2472,14 @@ function renderHistory(){
         </div>
         <div style="text-align:right">
           <div class="hist-card-rev">₱${(sh.revenue||0).toLocaleString('en-PH',{minimumFractionDigits:0})}</div>
-          <div style="font-size:11px;color:var(--txt3)">profit ₱${(sh.profit||0).toLocaleString('en-PH',{minimumFractionDigits:0})}</div>
+          <div style="font-size:11px;color:var(--txt3)">net profit ₱${(sh.profit||0).toLocaleString('en-PH',{minimumFractionDigits:0})}</div>
         </div>
       </div>
       <div class="hist-card-chips">
         <span class="hist-chip">${totalOut} items out</span>
         ${totalWaste?`<span class="hist-chip" style="color:var(--red)">⚠ ${totalWaste} wasted</span>`:''}
         <span class="hist-chip">COGS ₱${(sh.cogs||0).toFixed(0)}</span>
+        ${(sh.expenseTotal||0)>0?`<span class="hist-chip" style="color:var(--orange)">Expenses ₱${(sh.expenseTotal||0).toFixed(0)}</span>`:''}
         <span class="hist-chip">Ref: ${sh.id.slice(-6)}</span>
       </div>
       <div id="hist-detail-${idx}" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--bdr)">
@@ -2762,15 +2606,17 @@ function renderReports(){
   const shiftRevEl  = document.getElementById('rpt-shift-rev');
   if(!statsEl) return;
 
-  const totalRev    = shiftHistory.reduce((s,sh)=>s+(sh.revenue||0),0);
-  const totalCogs   = shiftHistory.reduce((s,sh)=>s+(sh.cogs||0),0);
-  const totalProfit = totalRev - totalCogs;
-  const totalShifts = shiftHistory.length;
+  const totalRev      = shiftHistory.reduce((s,sh)=>s+(sh.revenue||0),0);
+  const totalCogs     = shiftHistory.reduce((s,sh)=>s+(sh.cogs||0),0);
+  const totalExpenses = shiftHistory.reduce((s,sh)=>s+(sh.expenseTotal||0),0);
+  const totalProfit   = shiftHistory.reduce((s,sh)=>s+(sh.profit||0),0);
+  const totalShifts   = shiftHistory.length;
 
   statsEl.innerHTML = `
     <div class="stat-card"><div class="stat-lbl">💰 Total Revenue</div><div class="stat-val c-green">₱${totalRev.toLocaleString('en-PH',{maximumFractionDigits:0})}</div></div>
-    <div class="stat-card"><div class="stat-lbl">📈 Total Profit</div><div class="stat-val c-gold">₱${totalProfit.toLocaleString('en-PH',{maximumFractionDigits:0})}</div></div>
-    <div class="stat-card"><div class="stat-lbl">🏁 Total Shifts</div><div class="stat-val c-orange">${totalShifts}</div></div>`;
+    <div class="stat-card"><div class="stat-lbl">📈 Net Profit</div><div class="stat-val c-gold">₱${totalProfit.toLocaleString('en-PH',{maximumFractionDigits:0})}</div></div>
+    <div class="stat-card"><div class="stat-lbl">🏁 Total Shifts</div><div class="stat-val c-orange">${totalShifts}</div></div>
+    ${totalExpenses>0?`<div class="stat-card"><div class="stat-lbl">🧾 Total Expenses</div><div class="stat-val" style="color:var(--orange)">₱${totalExpenses.toLocaleString('en-PH',{maximumFractionDigits:0})}</div></div>`:''}` ;
 
   renderTrendChart();
 
@@ -2793,14 +2639,17 @@ function renderReports(){
     </div>`)
     .join('') : '<div style="font-size:13px;color:var(--txt3);padding:8px 0">No sales data yet.</div>';
 
-  // Revenue per shift
+  // Revenue per shift (last 10, expense-adjusted net profit shown)
   const last10 = shiftHistory.slice(0,10).reverse();
   const maxRev = Math.max(...last10.map(s=>s.revenue||0), 1);
   shiftRevEl.innerHTML = last10.length ? last10.map(sh=>`
     <div class="rpt-item-row">
       <div class="rpt-item-name" style="font-size:12px;color:var(--txt2)">${sh.staff} · ${new Date(sh.startedAt).toLocaleDateString('en-PH',{month:'short',day:'2-digit'})}</div>
       <div class="rpt-bar-wrap"><div class="rpt-bar" style="width:${((sh.revenue||0)/maxRev*100).toFixed(1)}%;background:var(--green)"></div></div>
-      <div class="rpt-item-val c-green">₱${(sh.revenue||0).toLocaleString('en-PH',{maximumFractionDigits:0})}</div>
+      <div style="text-align:right">
+        <div class="rpt-item-val c-green">₱${(sh.revenue||0).toLocaleString('en-PH',{maximumFractionDigits:0})}</div>
+        <div style="font-size:10px;color:var(--txt3)">net ₱${(sh.profit||0).toLocaleString('en-PH',{maximumFractionDigits:0})}</div>
+      </div>
     </div>`)
     .join('') : '<div style="font-size:13px;color:var(--txt3);padding:8px 0">No shifts recorded yet.</div>';
 }
@@ -2972,9 +2821,9 @@ function renderDashboard(){
   }
 
   // Revenue/profit/cogs from completed shifts
-  const allRev  = shiftHistory.reduce((s,sh) => s + (sh.revenue||0), 0);
-  const allCogs = shiftHistory.reduce((s,sh) => s + (sh.cogs||0), 0);
-  const allProfit = allRev - allCogs;
+  const allRev    = shiftHistory.reduce((s,sh) => s + (sh.revenue||0), 0);
+  const allCogs   = shiftHistory.reduce((s,sh) => s + (sh.cogs||0), 0);
+  const allProfit = shiftHistory.reduce((s,sh) => s + (sh.profit||0), 0);
 
   // Out of stock alert on dashboard — rich cards
   const oos = document.getElementById('dash-out-of-stock');
@@ -4636,31 +4485,19 @@ showPage = function(name, el){
   if(dot) dot.style.display = hasFlags ? 'block' : 'none';
 })();
 
-// Patch confirmEndShift to store cashDiff on the shift record
-// We intercept the actual shiftHistory push by wrapping confirmEndShift
-(function patchConfirmEndShift(){
-  // The original function pushes to shiftHistory and calls saveShiftHistory.
-  // We intercept by watching the array length and tagging the new entry.
+// ═══════════════════════════════════════
+//  v13.4: cashDiff is now written directly inside confirmEndShift.
+//  This wrapper only refreshes the nav flag dot after shift close.
+//  The old v11 cashDiff post-hoc tagging is retired.
+// ═══════════════════════════════════════
+(function patchConfirmEndShift_v13(){
   const origFn = window.confirmEndShift;
   if(!origFn) return;
   window.confirmEndShift = function(){
     const prevLen = shiftHistory.length;
     origFn.call(this);
-    // After the original call, if a new entry was added, tag it with cashDiff
     if(shiftHistory.length > prevLen){
-      const sh = shiftHistory[0]; // newest is unshifted to front
-      if(sh && !sh.cashDiffTagged){
-        const actualInput = document.getElementById('recon-actual');
-        const actualVal = actualInput ? parseFloat(actualInput.value) : NaN;
-        if(!isNaN(actualVal)){
-          const opening = sh.openingCash || 0;
-          const expected = opening + (sh.revenue || 0);
-          sh.cashDiff = actualVal - expected;
-          sh.cashDiffTagged = true;
-          saveShiftHistory();
-        }
-      }
-      // Refresh flag dot
+      // cashDiff is already on shiftHistory[0] — just refresh flag dot
       const staffMap = buildStaffStats();
       const hasFlags = Object.values(staffMap).some(s=>s.allFlags.some(f=>f.level==='danger'));
       const dot = document.getElementById('perf-nav-flag');
@@ -4888,11 +4725,11 @@ if(activeShift){
 
 <!-- mobile bottom nav -->
 <nav class="mobile-bottom-nav">
-  <div class="mbn-item active" id="mbn-dashboard" onclick="showPage(&#39;dashboard&#39;,document.getElementById(&#39;nav-dashboard&#39;))"><span class="mbn-icon">⊞</span><span>Dash</span></div>
-  <div class="mbn-item" id="mbn-inventory" onclick="showPage(&#39;inventory&#39;,document.getElementById(&#39;nav-inventory&#39;))"><span class="mbn-icon">📦</span><span>Stock</span></div>
-  <div class="mbn-item" id="mbn-alerts" onclick="showPage(&#39;alerts&#39;,document.getElementById(&#39;nav-alerts&#39;))" style="position:relative"><span class="mbn-icon">🔔</span><span>Alerts</span><span id="mbn-alerts-dot" style="display:none;position:absolute;top:6px;right:18px;width:8px;height:8px;border-radius:50%;background:var(--red)"></span></div>
-  <div class="mbn-item" id="mbn-shifts" onclick="showPage(&#39;shifts&#39;,document.getElementById(&#39;nav-shifts&#39;))"><span class="mbn-icon">▶</span><span>Shift</span></div>
-  <div class="mbn-item" id="mbn-performance" onclick="showPage(&#39;performance&#39;,document.getElementById(&#39;nav-performance&#39;))" style="position:relative"><span class="mbn-icon">🏆</span><span>Staff</span><span id="mbn-perf-dot" style="display:none;position:absolute;top:6px;right:12px;width:8px;height:8px;border-radius:50%;background:var(--red)"></span></div>
+  <div class="mbn-item" id="mbn-dashboard" onclick="showPage('dashboard',document.getElementById('nav-dashboard'))"><span class="mbn-icon">⊞</span><span>Dash</span></div>
+  <div class="mbn-item" id="mbn-inventory" onclick="showPage('inventory',document.getElementById('nav-inventory'))"><span class="mbn-icon">📦</span><span>Stock</span></div>
+  <div class="mbn-item" id="mbn-alerts" onclick="showPage('alerts',document.getElementById('nav-alerts'))" style="position:relative"><span class="mbn-icon">🔔</span><span>Alerts</span><span id="mbn-alerts-dot" style="display:none;position:absolute;top:6px;right:18px;width:8px;height:8px;border-radius:50%;background:var(--red)"></span></div>
+  <div class="mbn-item" id="mbn-shifts" onclick="showPage('shifts',document.getElementById('nav-shifts'))"><span class="mbn-icon">▶</span><span>Shift</span></div>
+  <div class="mbn-item" id="mbn-performance" onclick="showPage('performance',document.getElementById('nav-performance'))" style="position:relative"><span class="mbn-icon">🏆</span><span>Staff</span><span id="mbn-perf-dot" style="display:none;position:absolute;top:6px;right:12px;width:8px;height:8px;border-radius:50%;background:var(--red)"></span></div>
   <div class="mbn-item" onclick="toggleSidebar()"><span class="mbn-icon">☰</span><span>More</span></div>
 </nav>
 
@@ -4933,45 +4770,5 @@ document.getElementById('mbn-dashboard').classList.add('active');
   if(dot&&hasFlags) dot.style.display='block';
 })();
 </script>
-  
-<div id="login-screen" style="position: fixed; inset: 0px; background: rgb(11, 12, 14); z-index: 99999; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 16px; font-family: &quot;DM Sans&quot;, sans-serif;">
-  <div style="font-size:32px">🛒</div>
-  <div style="font-family:&#39;Unbounded&#39;,sans-serif;font-size:18px;font-weight:700;color:#f0f0f4">CartShift</div>
-  <input id="login-user" type="text" placeholder="Username" style="padding:12px 16px;border-radius:10px;border:1px solid #333;background:#111;color:#fff;font-size:14px;width:260px">
-  <input id="login-pass" type="password" placeholder="Password" style="padding:12px 16px;border-radius:10px;border:1px solid #333;background:#111;color:#fff;font-size:14px;width:260px">
-  <button onclick="checkLogin()" style="background:#F97316;color:#fff;border:none;border-radius:10px;padding:12px 32px;font-size:14px;font-weight:700;cursor:pointer;width:260px">Login</button>
-  <div id="login-error" style="color:#e8554a;font-size:13px;min-height:18px"></div>
-</div>
-
-<script>
-async function checkLogin(){
-  const u = document.getElementById('login-user').value.trim();
-  const p = document.getElementById('login-pass').value;
-  const hashU = await sha256(u);
-  const hashP = await sha256(p);
-  // SHA256 of your username and password
-  const correctU = '3497fad4b3162927c33a33cbfab96b5b2359ea13311b8bf4592db3aa8b1c4b8b';
-  const correctP = 'acfb1c679cad41357529069627807628d8402c5664de3258e9446fe37fdac932';
-  if(hashU === correctU && hashP === correctP){
-    document.getElementById('login-screen').style.display='none';
-    sessionStorage.setItem('cs_auth','1');
-  } else {
-    document.getElementById('login-error').textContent = 'Wrong username or password.';
-  }
-}
-async function sha256(msg){
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-function logout(){
-  sessionStorage.removeItem('cs_auth');
-  document.getElementById('login-screen').style.display='flex';
-}
-if(sessionStorage.getItem('cs_auth')==='1'){
-  document.addEventListener('DOMContentLoaded',()=>{
-    document.getElementById('login-screen').style.display='none';
-  });
-}
-</script>
-
-</body></html>
+</body>
+</html>
