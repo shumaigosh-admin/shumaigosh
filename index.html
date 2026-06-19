@@ -389,6 +389,12 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'DM Sans
 .cli-qty{width:64px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rs);padding:7px 8px;font-size:14px;font-weight:700;text-align:center;color:var(--txt);font-family:'DM Mono',monospace;}
 .cli-qty:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 2px var(--orange-l);}
 .cli-qty::-webkit-inner-spin-button{-webkit-appearance:none;}
+/* Cart-load recount fields (packs + leftover) — v13.5 */
+.cli-recount-row{display:flex;align-items:flex-end;gap:10px;margin-top:8px;flex-wrap:wrap;}
+.cli-recount-field{}
+.cli-recount-lbl{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;}
+.cli-recount-total{font-size:11px;color:var(--txt3);margin-left:auto;}
+.cli-recount-total.mismatch{color:var(--gold);font-weight:600;}
 .cart-load-empty{font-size:13px;color:var(--txt3);text-align:center;padding:18px 0;}
 
 /* Opening cash */
@@ -750,8 +756,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'DM Sans
 
     <!-- ═══ DASHBOARD ═══ -->
     <div class="page active" id="page-dashboard">
-      <div id="dash-expiry-alert"></div>
-      <div id="dash-out-of-stock"></div>
+
       <div id="dash-suspicious-v11" style="display:none"></div>
       <div id="notif-perm-banner-dash" style="display:none"></div>
       <div class="banner">
@@ -781,7 +786,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'DM Sans
 
     <!-- ═══ INVENTORY ═══ -->
     <div class="page" id="page-inventory">
-      <div id="inv-out-alert"></div>
+
       <div class="inv-filters" id="inv-filters">
         <div class="filter-chip active" onclick="setFilter('All',this)">All</div>
         <div class="filter-chip" onclick="setFilter('Siomai',this)">Siomai</div>
@@ -1294,6 +1299,44 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'DM Sans
           <div id="backup-status" style="font-size:12px;margin-top:10px;min-height:18px;"></div>
         </div>
 
+        <!-- ── DANGER ZONE ── -->
+        <div style="background:var(--bg2);border:1px solid var(--red-b);border-radius:var(--r);padding:22px;margin-bottom:12px">
+          <div style="font-size:11px;font-weight:600;color:var(--red);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">⚠️ Danger Zone — Reset Data</div>
+          <div style="font-size:13px;color:var(--txt2);margin-bottom:16px;line-height:1.6">
+            Permanently wipe selected data. <strong style="color:var(--red)">This cannot be undone.</strong> Export a backup first if you need to keep records.
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--rm);flex-wrap:wrap">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--txt)">📋 Audit Ledger</div>
+                <div style="font-size:12px;color:var(--txt3);margin-top:2px">Clears all log entries (Delivery In, Shift Out, etc.)</div>
+              </div>
+              <button onclick="confirmWipe('ledger')" style="background:var(--red-l);border:1px solid var(--red-b);color:var(--red);border-radius:var(--rm);padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:opacity .12s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">🗑 Wipe Ledger</button>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--rm);flex-wrap:wrap">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--txt)">📊 Shift History & Reports</div>
+                <div style="font-size:12px;color:var(--txt3);margin-top:2px">Clears all completed shift records and report data</div>
+              </div>
+              <button onclick="confirmWipe('shifts')" style="background:var(--red-l);border:1px solid var(--red-b);color:var(--red);border-radius:var(--rm);padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:opacity .12s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">🗑 Wipe Shifts</button>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--rm);flex-wrap:wrap">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--txt)">🚛 Vendor Deliveries</div>
+                <div style="font-size:12px;color:var(--txt3);margin-top:2px">Clears all delivery records (does not affect current inventory)</div>
+              </div>
+              <button onclick="confirmWipe('deliveries')" style="background:var(--red-l);border:1px solid var(--red-b);color:var(--red);border-radius:var(--rm);padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:opacity .12s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">🗑 Wipe Deliveries</button>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:rgba(232,85,74,.08);border:1px solid var(--red-b);border-radius:var(--rm);flex-wrap:wrap">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--red)">💥 Full Factory Reset</div>
+                <div style="font-size:12px;color:var(--txt3);margin-top:2px">Wipes everything — inventory, shifts, ledger, deliveries, settings</div>
+              </div>
+              <button onclick="confirmWipe('all')" style="background:var(--red);color:#fff;border:none;border-radius:var(--rm);padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:opacity .12s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">💥 Full Reset</button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -1419,10 +1462,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'DM Sans
 // ═══════════════════════════════════════
 const DEFAULTS = [
   {id:'try',   name:'TRy',            category:'Siomai',  color:'orange', unit:'packs',    sellPrice:0,  costPerPack:2,   pcsPerPack:1,  pcsPerOrder:1, threshold:5,  batches:[]},
-  {id:'csio',  name:'Chicken Siomai', category:'Siomai',  color:'orange', unit:'packs',    sellPrice:33, costPerPack:180, pcsPerPack:20, pcsPerOrder:4, threshold:2,  batches:[]},
-  {id:'psio',  name:'Pork Siomai',    category:'Siomai',  color:'blue',   unit:'packs',    sellPrice:33, costPerPack:180, pcsPerPack:20, pcsPerOrder:4, threshold:2,  batches:[]},
-  {id:'jsio',  name:'Japanese Siomai',category:'Siomai',  color:'green',  unit:'packs',    sellPrice:40, costPerPack:200, pcsPerPack:20, pcsPerOrder:4, threshold:2,  batches:[]},
-  {id:'bsio',  name:'Beef Siomai',    category:'Siomai',  color:'purple', unit:'packs',    sellPrice:45, costPerPack:220, pcsPerPack:20, pcsPerOrder:4, threshold:2,  batches:[]},
+  {id:'csio',  name:'Chicken Siomai', category:'Siomai',  color:'orange', unit:'pcs',      sellPrice:33, costPerPack:180, pcsPerPack:60, pcsPerOrder:4, threshold:2,  batches:[]},
+  {id:'psio',  name:'Pork Siomai',    category:'Siomai',  color:'blue',   unit:'pcs',      sellPrice:33, costPerPack:180, pcsPerPack:60, pcsPerOrder:4, threshold:2,  batches:[]},
+  {id:'jsio',  name:'Japanese Siomai',category:'Siomai',  color:'green',  unit:'pcs',      sellPrice:40, costPerPack:200, pcsPerPack:60, pcsPerOrder:4, threshold:2,  batches:[]},
+  {id:'bsio',  name:'Beef Siomai',    category:'Siomai',  color:'purple', unit:'pcs',      sellPrice:45, costPerPack:220, pcsPerPack:60, pcsPerOrder:4, threshold:2,  batches:[]},
   {id:'coke',  name:'Coke',           category:'Drinks',  color:'red',    unit:'pcs',      sellPrice:30, costPerPack:25,  pcsPerPack:1,  pcsPerOrder:1, threshold:5,  batches:[]},
   {id:'oj',    name:'Orange Juice',   category:'Drinks',  color:'gold',   unit:'pcs',      sellPrice:25, costPerPack:20,  pcsPerPack:1,  pcsPerOrder:1, threshold:5,  batches:[]},
   {id:'sprite',name:'Sprite',         category:'Drinks',  color:'blue',   unit:'pcs',      sellPrice:30, costPerPack:25,  pcsPerPack:1,  pcsPerOrder:1, threshold:5,  batches:[]},
@@ -1451,6 +1494,29 @@ function saveState(){
   try{localStorage.setItem('cs_inv_v1',JSON.stringify(state));}catch(e){}
 }
 let state = loadState();
+
+// ── v13.5 one-time migration: siomai items move from pack-counted batches
+//    to piece-counted batches. Converts EXISTING batch qty using each item's
+//    OLD pcsPerPack (whatever was already stored) so current stock numbers
+//    don't get corrupted, then locks in the real pack size (60) going forward.
+(function migrateSiomaiToPcsV135(){
+  if(state._pcsMigrationV135) return; // already migrated, never repeat
+  ['csio','psio','jsio','bsio'].forEach(id=>{
+    const item = state.items && state.items.find(i=>i.id===id);
+    if(!item) return;
+    if(item.unit === 'packs'){
+      const oldPpp = item.pcsPerPack || 1;
+      item.batches.forEach(b=>{
+        b.qty = (b.qty||0) * oldPpp;
+        b.unitCost = (b.unitCost||0) / oldPpp;
+      });
+      item.unit = 'pcs';
+    }
+    item.pcsPerPack = 60; // confirmed real pack size
+  });
+  state._pcsMigrationV135 = true;
+  saveState();
+})();
 
 // ═══════════════════════════════════════
 //  AUDIT LOG (immutable — never deleted)
@@ -1743,6 +1809,28 @@ function renderCartLoadItems(){
   }
   el.innerHTML = items.map(item=>{
     const qty = itemQty(item);
+    const recountApplies = (item.category === 'Siomai' || item.category === 'Drinks');
+    if(recountApplies){
+      const expected = expectedLeftover(item);
+      return `<div class="cart-load-item">
+        <div class="cli-dot" style="${dotStyle(item.color)}"></div>
+        <div style="flex:1">
+          <div class="cli-name">${item.name}</div>
+          <div class="cli-stock">${qty} ${item.unit} in stock</div>
+          <div class="cli-recount-row">
+            <div class="cli-recount-field">
+              <div class="cli-recount-lbl">Packs to bring</div>
+              <input class="cli-qty" id="cload-packs-${item.id}" type="number" value="0" min="0" placeholder="0" oninput="updateLoadTotal('${item.id}')">
+            </div>
+            <div class="cli-recount-field">
+              <div class="cli-recount-lbl">Leftover counted (expect ~${expected})</div>
+              <input class="cli-qty" id="cload-left-${item.id}" type="number" value="${expected}" min="0" placeholder="0" oninput="updateLoadTotal('${item.id}')">
+            </div>
+            <div class="cli-recount-total" id="cload-total-${item.id}">→ Loading 0 ${item.unit}</div>
+          </div>
+        </div>
+      </div>`;
+    }
     return `<div class="cart-load-item">
       <div class="cli-dot" style="${dotStyle(item.color)}"></div>
       <div style="flex:1">
@@ -1752,6 +1840,27 @@ function renderCartLoadItems(){
       <input class="cli-qty" id="cload-${item.id}" type="number" value="0" min="0" max="${qty}" placeholder="0" oninput="clampCartLoad('${item.id}',${qty})">
     </div>`;
   }).join('');
+  // initialize totals for recount items
+  state.items.filter(i=>itemQty(i)>0 && (i.category==='Siomai'||i.category==='Drinks')).forEach(i=>updateLoadTotal(i.id));
+}
+
+// ── v13.5: live total for the packs+leftover recount fields
+// Packs to bring = fresh packs from the supplier — no stock cap, vendor decides how many.
+// Leftover counted = physical recount of unsold pcs from previous shift — never auto-adjusted.
+function updateLoadTotal(itemId){
+  const item = state.items.find(i=>i.id===itemId);
+  if(!item) return;
+  const packsEl = document.getElementById('cload-packs-'+itemId);
+  const leftEl  = document.getElementById('cload-left-'+itemId);
+  const totalEl = document.getElementById('cload-total-'+itemId);
+  if(!packsEl || !leftEl || !totalEl) return;
+  let packs = parseInt(packsEl.value||0); if(packs<0){ packs=0; packsEl.value=0; }
+  const left = parseInt(leftEl.value||'') || 0;
+  const ppp = item.pcsPerPack || 1;
+  const total = (packs * ppp) + left;
+  const expected = expectedLeftover(item);
+  totalEl.textContent = `→ Loading ${total} ${item.unit}`;
+  totalEl.classList.toggle('mismatch', left !== expected);
 }
 
 function clampCartLoad(itemId, max){
@@ -1767,6 +1876,28 @@ function startShift(){
   if(!name){ alert('Please enter a staff name.'); return; }
   const openingCash = parseFloat(document.getElementById('shift-opening-cash')?.value||0);
 
+  // ── v13.5: first pass — read all inputs and detect leftover-recount
+  // mismatches WITHOUT mutating any state yet.
+  const items = state.items.filter(i=>itemQty(i)>0);
+  let hasMismatch = false;
+  items.forEach(item=>{
+    const recountApplies = (item.category === 'Siomai' || item.category === 'Drinks');
+    if(!recountApplies) return;
+    const leftEl = document.getElementById('cload-left-'+item.id);
+    if(!leftEl) return;
+    const counted = parseInt(leftEl.value||0);
+    if(counted !== expectedLeftover(item)) hasMismatch = true;
+  });
+
+  const run = () => finalizeStartShift(name, openingCash, items);
+  if(hasMismatch){
+    requirePin('Leftover Mismatch', 'Counted leftover doesn\'t match system records. Enter manager PIN to confirm and proceed.', run);
+  } else {
+    run();
+  }
+}
+
+function finalizeStartShift(name, openingCash, items){
   activeShift = {
     id:          'SHF-'+Date.now(),
     staff:       name,
@@ -1779,13 +1910,36 @@ function startShift(){
   };
 
   // Process cart loads — deduct from inventory immediately
-  const items = state.items.filter(i=>itemQty(i)>0);
   items.forEach(item=>{
-    const el = document.getElementById('cload-'+item.id);
-    const qty = parseInt(el?.value||0);
-    if(qty<=0) return;
+    const recountApplies = (item.category === 'Siomai' || item.category === 'Drinks');
+    let take;
+    if(recountApplies){
+      const packsEl = document.getElementById('cload-packs-'+item.id);
+      const leftEl  = document.getElementById('cload-left-'+item.id);
+      const packs   = parseInt(packsEl?.value||0);
+      const counted = parseInt(leftEl?.value||0);
+      const { expected, diff } = reconcileLeftover(item, counted);
+      if(diff !== 0){
+        writeLog('Adjustment', {
+          item:   item.name,
+          qty:    diff,
+          before: expected,
+          after:  counted,
+          refId:  activeShift.id,
+          by:     name,
+          vendor: 'Leftover recount variance (manager confirmed)',
+        });
+      }
+      const ppp = item.pcsPerPack || 1;
+      take = (packs*ppp) + counted;
+    } else {
+      const el = document.getElementById('cload-'+item.id);
+      take = parseInt(el?.value||0);
+    }
+    if(take<=0) return;
     const available = itemQty(item);
-    const take = Math.min(qty, available);
+    // Do NOT clamp take — packs come from the vendor (physical stock),
+    // leftover is already reconciled into inventory above.
     const before = available;
     const cost = deductFIFO(item, take);
     const after = itemQty(item);
@@ -2656,6 +2810,37 @@ function renderReports(){
 
 function itemQty(item){ return item.batches.reduce((s,b)=>s+b.qty,0); }
 
+// ── v13.5: unit-aware conversion — items already tracked in 'pcs' (drinks,
+// and siomai after the migration) must NOT be multiplied by pcsPerPack again.
+// Items still tracked in whole packs (e.g. Rice/portions, legacy items)
+// keep the original behavior unchanged.
+function unitsToPcs(item, units){
+  return item.unit === 'pcs' ? units : units * (item.pcsPerPack || 1);
+}
+
+// ── v13.5: expected leftover (pcs) currently sitting in stock from a prior
+// shift's return, used to show staff what the system thinks should be left
+// and to detect a recount mismatch.
+function expectedLeftover(item){
+  return item.batches.filter(b=>b.shiftReturn).reduce((s,b)=>s+(b.qty||0),0);
+}
+
+// ── v13.5: reconcile the recorded leftover batch(es) against a manually
+// recounted pcs value. Only touches the shiftReturn-flagged batches for this
+// item — sealed/未-opened pack batches are untouched.
+function reconcileLeftover(item, actualCounted){
+  const expected = expectedLeftover(item);
+  const diff = actualCounted - expected;
+  if(diff === 0) return {expected, diff:0};
+  const idx = item.batches.findIndex(b=>b.shiftReturn);
+  item.batches = item.batches.filter(b=>!b.shiftReturn);
+  if(actualCounted > 0){
+    const newBatch = {qty:actualCounted, unitCost:0, date:todayStr(), shiftReturn:true, varianceAdjusted:true};
+    if(idx >= 0) item.batches.splice(idx,0,newBatch); else item.batches.unshift(newBatch);
+  }
+  return {expected, diff};
+}
+
 // ── Cost/pricing helpers ──────────────────────────────────────
 function costPerPiece(item){
   const ppp = item.pcsPerPack || 1;
@@ -2672,23 +2857,27 @@ function marginPct(item){
   return ((profitPerOrder(item) / sell) * 100);
 }
 function packsToOrders(item, packs){
-  const pcsPerPack = item.pcsPerPack || 1;
   const pcsPerOrder = item.pcsPerOrder || 1;
   if(!pcsPerOrder) return packs;
-  return Math.floor((packs * pcsPerPack) / pcsPerOrder);
+  return Math.floor(unitsToPcs(item, packs) / pcsPerOrder);
 }
 function revenueFromPacks(item, packsSold){
-  return packsToOrders(item, packsSold) * sellPerOrder(item);
+  const pcsPerOrder = item.pcsPerOrder || 1;
+  const pricePerPc  = sellPerOrder(item) / pcsPerOrder;
+  // packsSold is already in pcs for pcs-tracked items (siomai, drinks)
+  // for pack-tracked items (rice, portions) convert to pcs first
+  const totalPcs = item.unit === 'pcs' ? packsSold : packsSold * (item.pcsPerPack || 1);
+  return totalPcs * pricePerPc;
 }
 function cogsFromPacks(item, packsSold){
+  if(item.unit === 'pcs') return packsSold * costPerPiece(item);
   return packsSold * (item.costPerPack || 0);
 }
 function pcsLeftFromPacks(item, packsTaken, packsSold, packsWasted){
-  const ppp = item.pcsPerPack || 1;
-  const takenPcs = packsTaken * ppp;
+  const takenPcs = unitsToPcs(item, packsTaken);
   const soldOrders = packsToOrders(item, packsSold);
   const soldPcs = soldOrders * (item.pcsPerOrder || 1);
-  const wastedPcs = packsWasted * ppp;
+  const wastedPcs = unitsToPcs(item, packsWasted);
   return Math.max(0, takenPcs - soldPcs - wastedPcs);
 }
 
@@ -2824,41 +3013,6 @@ function renderDashboard(){
   const allRev    = shiftHistory.reduce((s,sh) => s + (sh.revenue||0), 0);
   const allCogs   = shiftHistory.reduce((s,sh) => s + (sh.cogs||0), 0);
   const allProfit = shiftHistory.reduce((s,sh) => s + (sh.profit||0), 0);
-
-  // Out of stock alert on dashboard — rich cards
-  const oos = document.getElementById('dash-out-of-stock');
-  if(oos) oos.innerHTML = buildStockAlertSection(outItems, 'oos', 'Out of Stock — Needs Immediate Restock');
-
-  // Expiry alerts
-  const _today = new Date(); _today.setHours(0,0,0,0);
-  const _in3 = new Date(_today); _in3.setDate(_in3.getDate()+3);
-  const expiryEl = document.getElementById('dash-expiry-alert');
-  if(expiryEl){
-    const expired = [], soonExp = [];
-    state.items.forEach(item=>{
-      item.batches.forEach(b=>{
-        if(!b.expiryDate) return;
-        const exp = new Date(b.expiryDate); exp.setHours(0,0,0,0);
-        const entry = {name:item.name, qty:b.qty, unit:item.unit, exp:b.expiryDate};
-        if(exp < _today)   expired.push(entry);
-        else if(exp<=_in3) soonExp.push(entry);
-      });
-    });
-    let html = '';
-    if(expired.length){
-      html += `<div class="alert-card" style="margin-bottom:10px">
-        <div class="alert-hdr"><span class="alert-hdr-ico">⚠️</span><span class="alert-hdr-title">Expired Stock — Do Not Sell</span></div>
-        <ul class="alert-list">${expired.map(b=>`<li>${b.name} — ${b.qty} ${b.unit} · Expired ${b.exp}</li>`).join('')}</ul>
-      </div>`;
-    }
-    if(soonExp.length){
-      html += `<div style="background:var(--gold-l);border:1px solid var(--gold-b);border-radius:var(--r);padding:15px 18px;margin-bottom:10px">
-        <div class="alert-hdr"><span class="alert-hdr-ico">⏰</span><span class="alert-hdr-title" style="color:var(--gold)">Expiring Within 3 Days — Sell First</span></div>
-        <ul class="alert-list">${soonExp.map(b=>`<li style="color:var(--gold);opacity:.85">${b.name} — ${b.qty} ${b.unit} · Expires ${b.exp}</li>`).join('')}</ul>
-      </div>`;
-    }
-    expiryEl.innerHTML = html;
-  }
 
   // Stats
   document.getElementById('dash-total-stock').textContent = totalStock;
@@ -3018,14 +3172,6 @@ function renderInventory(){
   const items = state.items;
   const outItems = items.filter(i=>itemQty(i)===0);
 
-  // out of stock alert — rich card
-  const alertEl = document.getElementById('inv-out-alert');
-  if(outItems.length){
-    alertEl.innerHTML = buildStockAlertSection(outItems, 'oos', 'Out of Stock') + '<div style="height:4px"></div>';
-  } else {
-    alertEl.innerHTML = '';
-  }
-
   // filter items
   const filtered = activeFilter==='All' ? items : items.filter(i=>i.category===activeFilter);
 
@@ -3119,7 +3265,7 @@ function renderInventory(){
         <!-- ── ADD BATCH ── -->
         <div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;font-weight:600">Add Stock Batch</div>
         <div class="batch-form">
-          <div class="batch-field"><div class="batch-lbl">Qty (packs)</div><input class="batch-input" id="bqty-${item.id}" type="number" min="0" placeholder="0"></div>
+          <div class="batch-field"><div class="batch-lbl">${item.unit==='pcs' && (item.pcsPerPack||1)>1 ? 'Packs Received' : 'Qty (packs)'}</div><input class="batch-input" id="bqty-${item.id}" type="number" min="0" placeholder="0"></div>
           <div class="batch-field"><div class="batch-lbl">Cost ₱/pack</div><input class="batch-input" id="bcost-${item.id}" type="number" min="0" placeholder="0" step="0.01"></div>
           <div class="batch-field"><div class="batch-lbl">Date Received</div><input class="batch-input" id="bdate-${item.id}" type="date" value="${todayStr()}"></div>
           <button class="btn-batch" onclick="addBatch('${item.id}')">+ Add</button>
@@ -3130,6 +3276,11 @@ function renderInventory(){
         </div>
         <div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;font-weight:600">Batches on hand</div>
         <div class="batches-list">${batchesHtml}</div>
+
+        <!-- ── DELETE ITEM ── -->
+        <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--red-b)">
+          <button class="btn-batch" style="background:var(--red-l);border-color:var(--red-b);color:var(--red);width:100%" onclick="deleteItem('${item.id}',event)">🗑 Delete This Item</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -3178,11 +3329,19 @@ function saveItemSettings(itemId){
 function addBatch(itemId){
   const item = state.items.find(i=>i.id===itemId);
   if(!item) return;
-  const qty = parseInt(document.getElementById('bqty-'+itemId)?.value||0);
-  const cost = parseFloat(document.getElementById('bcost-'+itemId)?.value||0);
+  const enteredQty = parseInt(document.getElementById('bqty-'+itemId)?.value||0);
+  const enteredCost = parseFloat(document.getElementById('bcost-'+itemId)?.value||0);
   const date = document.getElementById('bdate-'+itemId)?.value||todayStr();
-  if(!qty||qty<=0){alert('Please enter a valid quantity.');return;}
+  if(!enteredQty||enteredQty<=0){alert('Please enter a valid quantity.');return;}
   const expiryDate = document.getElementById('bexpiry-'+itemId)?.value || '';
+  // v13.5: for pcs-tracked items (siomai post-migration, drinks), the form
+  // is still filled in as "packs received / cost per pack" since that's how
+  // supplier delivers — convert to pcs + cost-per-piece for storage.
+  // For pcsPerPack=1 (drinks) this is mathematically a no-op vs before.
+  // Items not tracked in 'pcs' (Rice/portions, etc.) are completely untouched.
+  const ppp = item.pcsPerPack || 1;
+  const qty  = item.unit === 'pcs' ? enteredQty * ppp : enteredQty;
+  const cost = item.unit === 'pcs' ? enteredCost / ppp : enteredCost;
   const before = itemQty(item);
   item.batches.push({qty, unitCost:cost, date, ...(expiryDate ? {expiryDate} : {})});
   const after = itemQty(item);
@@ -3210,6 +3369,20 @@ function deleteBatch(itemId, batchIdx, e){
     renderInventory();
     const card = document.getElementById('icard-'+itemId);
     if(card) card.classList.add('expanded');
+  });
+}
+
+function deleteItem(itemId, e){
+  e.stopPropagation();
+  const item = state.items.find(i=>i.id===itemId);
+  if(!item) return;
+  requirePin('Delete Item', `Manager PIN required to delete "${item.name}" from inventory.`, () => {
+    const qty = itemQty(item);
+    state.items = state.items.filter(i=>i.id!==itemId);
+    saveState();
+    writeLog('Item Deleted', {item:item.name, qty:-qty, before:qty, after:0, by:'Manager'});
+    renderInventory();
+    renderDashboard();
   });
 }
 
@@ -4720,6 +4893,38 @@ if(activeShift){
 <!-- ═══ TOAST CONTAINER (v12) ═══ -->
 <div class="notif-toast-wrap" id="notif-toast-wrap"></div>
 
+<!-- ═══ WIPE CONFIRMATION MODAL ═══ -->
+<div id="wipe-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--bg2);border:1px solid var(--red-b);border-radius:var(--r);padding:28px;max-width:400px;width:100%">
+    <div style="font-size:22px;text-align:center;margin-bottom:8px" id="wipe-modal-icon">⚠️</div>
+    <div style="font-size:16px;font-weight:700;color:var(--red);text-align:center;margin-bottom:6px" id="wipe-modal-title">Confirm Wipe</div>
+    <div style="font-size:13px;color:var(--txt2);text-align:center;margin-bottom:20px;line-height:1.6" id="wipe-modal-desc"></div>
+
+    <!-- Step 1: PIN -->
+    <div id="wipe-step1">
+      <div style="font-size:12px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Step 1 of 2 — Enter Manager PIN</div>
+      <input id="wipe-pin-input" type="password" maxlength="4" inputmode="numeric" placeholder="••••"
+        style="width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rm);padding:11px 14px;font-size:20px;font-family:'DM Mono',monospace;color:var(--txt);text-align:center;letter-spacing:.3em;outline:none;margin-bottom:8px"
+        oninput="wipeStep1Check()" onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--bdr2)'">
+      <div id="wipe-pin-error" style="font-size:12px;color:var(--red);min-height:16px;text-align:center"></div>
+    </div>
+
+    <!-- Step 2: Type confirm -->
+    <div id="wipe-step2" style="display:none">
+      <div style="font-size:12px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Step 2 of 2 — Type <span style="color:var(--red);font-family:'DM Mono',monospace">DELETE</span> to confirm</div>
+      <input id="wipe-confirm-input" type="text" placeholder="Type DELETE here"
+        style="width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--rm);padding:11px 14px;font-size:15px;font-family:'DM Mono',monospace;color:var(--red);text-align:center;outline:none;margin-bottom:8px;text-transform:uppercase"
+        oninput="wipeStep2Check()" onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--bdr2)'">
+      <div id="wipe-confirm-error" style="font-size:12px;color:var(--red);min-height:16px;text-align:center"></div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button onclick="closeWipeModal()" style="flex:1;background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--rm);padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Cancel</button>
+      <button id="wipe-next-btn" onclick="wipeNextStep()" style="flex:1;background:var(--red-l);border:1px solid var(--red-b);color:var(--red);border-radius:var(--rm);padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;opacity:.5;pointer-events:none" id="wipe-next-btn">Next →</button>
+    </div>
+  </div>
+</div>
+
 <!-- sidebar overlay -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
@@ -4734,6 +4939,147 @@ if(activeShift){
 </nav>
 
 <script>
+// ═══════════════════════════════════════
+//  DANGER ZONE — WIPE FUNCTIONS
+// ═══════════════════════════════════════
+let _wipeTarget = null;
+let _wipeStep   = 1;
+
+const WIPE_LABELS = {
+  ledger:     { title:'Wipe Audit Ledger',           icon:'📋', desc:'All log entries will be permanently deleted. This cannot be undone.' },
+  shifts:     { title:'Wipe Shift History & Reports', icon:'📊', desc:'All completed shift records and report data will be permanently deleted. This cannot be undone.' },
+  deliveries: { title:'Wipe Vendor Deliveries',       icon:'🚛', desc:'All delivery records will be permanently deleted. Current inventory stock will NOT be affected.' },
+  all:        { title:'Full Factory Reset',            icon:'💥', desc:'ALL data will be wiped — inventory, shifts, ledger, deliveries, and settings. The app will return to factory defaults. This cannot be undone.' },
+};
+
+function confirmWipe(target){
+  _wipeTarget = target;
+  _wipeStep   = 1;
+  const cfg = WIPE_LABELS[target];
+  document.getElementById('wipe-modal-icon').textContent  = cfg.icon;
+  document.getElementById('wipe-modal-title').textContent = cfg.title;
+  document.getElementById('wipe-modal-desc').textContent  = cfg.desc;
+  document.getElementById('wipe-pin-input').value    = '';
+  document.getElementById('wipe-pin-error').textContent   = '';
+  document.getElementById('wipe-confirm-input').value     = '';
+  document.getElementById('wipe-confirm-error').textContent = '';
+  document.getElementById('wipe-step1').style.display = 'block';
+  document.getElementById('wipe-step2').style.display = 'none';
+  const btn = document.getElementById('wipe-next-btn');
+  btn.textContent = 'Next →';
+  btn.style.opacity = '.5';
+  btn.style.pointerEvents = 'none';
+  const overlay = document.getElementById('wipe-modal-overlay');
+  overlay.style.display = 'flex';
+  setTimeout(()=>document.getElementById('wipe-pin-input').focus(), 100);
+}
+
+function closeWipeModal(){
+  document.getElementById('wipe-modal-overlay').style.display = 'none';
+  _wipeTarget = null;
+  _wipeStep   = 1;
+}
+
+function wipeStep1Check(){
+  const val = document.getElementById('wipe-pin-input').value;
+  const btn = document.getElementById('wipe-next-btn');
+  if(val.length === 4){
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+  } else {
+    btn.style.opacity = '.5';
+    btn.style.pointerEvents = 'none';
+  }
+}
+
+function wipeStep2Check(){
+  const val = document.getElementById('wipe-confirm-input').value.trim().toUpperCase();
+  const btn = document.getElementById('wipe-next-btn');
+  if(val === 'DELETE'){
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+    btn.style.background = 'var(--red)';
+    btn.style.color = '#fff';
+    btn.style.borderColor = 'var(--red)';
+  } else {
+    btn.style.opacity = '.5';
+    btn.style.pointerEvents = 'none';
+    btn.style.background = 'var(--red-l)';
+    btn.style.color = 'var(--red)';
+    btn.style.borderColor = 'var(--red-b)';
+  }
+}
+
+async function wipeNextStep(){
+  if(_wipeStep === 1){
+    // Verify PIN
+    const entered = document.getElementById('wipe-pin-input').value;
+    const stored  = getStoredHash();
+    const enteredHash = await hashPin(entered);
+    if(enteredHash !== stored){
+      document.getElementById('wipe-pin-error').textContent = 'Incorrect PIN. Try again.';
+      document.getElementById('wipe-pin-input').value = '';
+      wipeStep1Check();
+      return;
+    }
+    // PIN correct — move to step 2
+    document.getElementById('wipe-pin-error').textContent = '';
+    document.getElementById('wipe-step1').style.display = 'none';
+    document.getElementById('wipe-step2').style.display = 'block';
+    const btn = document.getElementById('wipe-next-btn');
+    btn.textContent = '🗑 Confirm Wipe';
+    btn.style.opacity = '.5';
+    btn.style.pointerEvents = 'none';
+    btn.style.background = 'var(--red-l)';
+    btn.style.color = 'var(--red)';
+    btn.style.borderColor = 'var(--red-b)';
+    _wipeStep = 2;
+    setTimeout(()=>document.getElementById('wipe-confirm-input').focus(), 100);
+  } else {
+    // Execute wipe
+    const val = document.getElementById('wipe-confirm-input').value.trim().toUpperCase();
+    if(val !== 'DELETE'){
+      document.getElementById('wipe-confirm-error').textContent = 'You must type DELETE exactly.';
+      return;
+    }
+    executeWipe(_wipeTarget);
+  }
+}
+
+function executeWipe(target){
+  if(target === 'ledger' || target === 'all'){
+    auditEntries = [];
+    try{ localStorage.removeItem(AUDIT_KEY); }catch(e){}
+  }
+  if(target === 'shifts' || target === 'all'){
+    shiftHistory = [];
+    activeShift  = null;
+    try{ localStorage.removeItem(HISTORY_KEY); }catch(e){}
+    try{ localStorage.removeItem(SHIFT_KEY); }catch(e){}
+  }
+  if(target === 'deliveries' || target === 'all'){
+    deliveries = [];
+    try{ localStorage.removeItem('cs_deliveries'); }catch(e){}
+  }
+  if(target === 'all'){
+    // Reset inventory to defaults
+    state = {items: JSON.parse(JSON.stringify(DEFAULTS))};
+    saveState();
+    try{ localStorage.removeItem('cs_notif_settings_v1'); }catch(e){}
+    try{ localStorage.removeItem('cs_manager_pin'); }catch(e){}
+    try{ localStorage.removeItem('cs_staff_registry'); }catch(e){}
+    try{ localStorage.removeItem('cs_thresholds'); }catch(e){}
+  }
+  closeWipeModal();
+  // Re-render everything
+  renderDashboard();
+  renderInventory();
+  renderDeliveries();
+  renderShiftsPage();
+  const cfg = WIPE_LABELS[target];
+  pushNotif('success', cfg.icon + ' ' + cfg.title + ' — Done', 'Data has been permanently wiped.');
+}
+
 function toggleSidebar(){
   document.querySelector('.sidebar').classList.toggle('open');
   document.getElementById('sidebar-overlay').classList.toggle('open');
